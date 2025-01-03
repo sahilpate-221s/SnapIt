@@ -7,8 +7,8 @@ import { useSelector } from "react-redux";
 import ProfileDropdown from "../core/Auth/ProfileDropdown"; // Import the ProfileDropdown component
 
 const Navbar = () => {
-  const { token } = useSelector((state) => state.auth);
-  const { user } = useSelector((state) => state.profile);
+  const { token } = useSelector((state) => state.auth); // Get token from Redux state
+  const { user } = useSelector((state) => state.profile); // Get user info from Redux state
   const location = useLocation(); // Get the current route
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Manage menu toggle for mobile
 
@@ -20,43 +20,46 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-white p-3 shadow-md">
+    <nav className="bg-white p-3 shadow-md ">
       <div className="container mx-auto flex justify-between items-center w-11/12 max-w-maxContent">
-        {/* Left Section: Logo and Search */}
+        {/* Left Section: Logo and Search or Navigation Links */}
         <div className="flex items-center space-x-4">
           <img src={logo} alt="Logo" className="h-8" /> {/* Adjusted to h-8 for consistent aspect ratio */}
-          <div className="relative items-center hidden md:flex">
-            <input
-              type="text"
-              placeholder="Search"
-              className="font-serif h-8 md:w-40 lg:w-80 rounded-full p-2 border border-gray-300"
-            />
-            <div className="absolute right-2 bg-gray-200 p-1 rounded-full">
-              <FaSearch className="text-gray-500" />
+          
+          {/* Render search box if token exists (user is logged in) */}
+          {token ? (
+            <div className="relative items-center hidden md:flex">
+              <input
+                type="text"
+                placeholder="Search"
+                className="font-serif h-8 md:w-40 lg:w-80 rounded-full p-2 border border-gray-300"
+              />
+              <div className="absolute right-2 bg-gray-200 p-1 rounded-full">
+                <FaSearch className="text-gray-500" />
+              </div>
             </div>
-          </div>
+          ) : (
+            // Render nav items if token is not present (user is not logged in)
+            <div className="hidden md:flex items-center space-x-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`${
+                    location.pathname === item.path
+                      ? "bg-gray-400 text-black"
+                      : "text-gray-600 hover:text-black"
+                  } px-2 py-1 rounded-md`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Right Section: Navigation and Authentication Links */}
+        {/* Right Section: Navigation Links or ProfileDropdown */}
         <div className="flex items-center space-x-4 md:space-x-6">
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`${
-                  location.pathname === item.path
-                    ? "bg-gray-400 text-black"
-                    : "text-gray-600 hover:text-black"
-                } px-2 py-1 rounded-md`}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Conditional rendering for authentication links or ProfileDropdown */}
           {token ? (
             <ProfileDropdown /> // Render ProfileDropdown if token exists
           ) : (
@@ -108,7 +111,7 @@ const Navbar = () => {
               to={item.path}
               className={`${
                 location.pathname === item.path
-                  ? "bg-gray-400 text-black rounded-xl" // Increased border radius
+                  ? "bg-gray-400 text-black rounded-xl"
                   : "text-gray-600 hover:text-black hover:rounded-xl"
               } px-3 py-2`}
               onClick={() => setIsMenuOpen(false)} // Close menu on link click

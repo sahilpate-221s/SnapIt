@@ -4,7 +4,12 @@ import { setLoading, setToken } from '../../slices/authSlice';
 import { setUser } from "../../slices/profileSlice";
 import { toast } from 'react-toastify';
 
-const { REGISTER_API, LOGIN_API, LOGOUT_API, CHANGE_PASSWORD_API, DELETE_ACCOUNT_API } = endpoints;
+const { 
+  REGISTER_API, 
+  LOGIN_API, LOGOUT_API, 
+  CHANGE_PASSWORD_API, 
+  DELETE_ACCOUNT_API 
+} = endpoints;
 
 export function register(name, email, password, confirmPassword, navigate) {
   return async (dispatch) => {
@@ -23,12 +28,6 @@ export function register(name, email, password, confirmPassword, navigate) {
 
       if (!response.data.success) {
         throw new Error(response.data.message);
-      }
-
-      const token = response.data.token;
-      if (token) {
-        localStorage.setItem("token", JSON.stringify(token));
-        dispatch(setToken(token));
       }
 
       toast.success("Signup Successful!");
@@ -65,14 +64,14 @@ export function login(email, password, navigate) {
       dispatch(setToken(response.data.token));
       dispatch(setUser(response.data.user));
 
-      localStorage.setItem("token", JSON.stringify(response.data.token));
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // localStorage.setItem("token", JSON.stringify(response.data.token));
+      // localStorage.setItem("user", JSON.stringify(response.data.user));
 
       navigate("/all");
     } catch (error) {
       const errorMessage = error?.response?.data?.message || error.message || "Login Failed";
       toast.error(errorMessage);
-      dispatch(setError(errorMessage)); // If this action is defined
+      // dispatch(setError(errorMessage)); // If this action is defined
     } finally {
       dispatch(setLoading(false));
       toast.dismiss(toastId);
@@ -103,7 +102,7 @@ export function logout(navigate) {
     } catch (error) {
       const errorMessage = error?.response?.data?.message || error.message || "Logout Failed";
       toast.error(errorMessage);
-      dispatch(setError(errorMessage)); // If this action is defined
+      // dispatch(setError(errorMessage)); // If this action is defined
     } finally {
       dispatch(setLoading(false));
       toast.dismiss(toastId);
@@ -131,7 +130,7 @@ export function changePassword(currentPassword, newPassword, navigate) {
     } catch (error) {
       const errorMessage = error?.response?.data?.message || error.message || "Change Password Failed";
       toast.error(errorMessage);
-      dispatch(setError(errorMessage)); // If this action is defined
+      // dispatch(setError(errorMessage)); // If this action is defined
     } finally {
       dispatch(setLoading(false));
       toast.dismiss(toastId);
@@ -162,7 +161,7 @@ export function deleteAccount(navigate) {
     } catch (error) {
       const errorMessage = error?.response?.data?.message || error.message || "Delete Account Failed";
       toast.error(errorMessage);
-      dispatch(setError(errorMessage)); // If this action is defined
+      // dispatch(setError(errorMessage)); // If this action is defined
     } finally {
       dispatch(setLoading(false));
       toast.dismiss(toastId);

@@ -25,7 +25,7 @@ function SignupForm() {
     }));
   };
 
-  const handleOnSubmit = async (e) => {
+  const handleOnSubmit = (e) => {
     e.preventDefault();
 
     // Validation
@@ -39,30 +39,22 @@ function SignupForm() {
       return;
     }
 
-    try {
-      console.log("Form submission started");
-      // Dispatch the register action
-      await dispatch(register(name, email, password, navigate));
-      // Optionally store signup data
-      dispatch(setSignupData(formData));
-      console.log("Signup successful:", formData);
+    console.log("Form submission started");
+    dispatch(register(name, email, password, navigate));
+    dispatch(setSignupData(formData));
+    console.log("Signup successful:", formData);
 
-      // Reset the form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
+    // Reset the form
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
 
-      // Success message
-      toast.success("Signup Successful!");
-      // Navigate to dashboard or another route
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error during signup:", error);
-      toast.error(error.message || "Signup failed. Please try again.");
-    }
+    // Success message
+    toast.success("Signup Successful!");
+  
   };
 
   return (
@@ -163,7 +155,10 @@ function SignupForm() {
           {/* Already have an account? */}
           <p className="text-center text-sm text-gray-600 mt-4">
             Already have an account?{" "}
-            <Link to="/login" className="text-green-500 font-medium hover:underline">
+            <Link
+              to="/login"
+              className="text-green-500 font-medium hover:underline"
+            >
               Login here
             </Link>
           </p>
