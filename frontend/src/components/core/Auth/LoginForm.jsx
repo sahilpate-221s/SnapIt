@@ -28,10 +28,9 @@ const LoginForm = () => {
     e.preventDefault();
     setIsLoading(true);
     dispatch(login(email, password, navigate));
-    
+
     setIsLoading(false);
   };
-
 
   return (
     <form onSubmit={handleOnSubmit}>
@@ -56,7 +55,10 @@ const LoginForm = () => {
 
       {/* Password field */}
       <div className="mb-6 relative">
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-gray-700"
+        >
           Password
         </label>
         <input
@@ -80,7 +82,10 @@ const LoginForm = () => {
 
       {/* Forgot Password Link */}
       <div className="mb-4 text-right">
-        <Link to="/forgot-password" className="text-sm text-blue-500 hover:underline">
+        <Link
+          to="/forgot-password"
+          className="text-sm text-blue-500 hover:underline"
+        >
           Forgot Password?
         </Link>
       </div>
@@ -88,10 +93,7 @@ const LoginForm = () => {
       {/* Login Button */}
       <button
         type="submit"
-        className={`w-full px-6 py-3 rounded-lg text-white ${
-          isFormValid && !isLoading ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-400"
-        } transition duration-300`}
-       
+        className={`w-full px-6 py-3 rounded-lg text-white transition duration-300`}
       >
         {isLoading ? "Logging in..." : "Login"}
       </button>

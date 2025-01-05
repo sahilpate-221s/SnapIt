@@ -40,7 +40,7 @@ function SignupForm() {
     }
 
     console.log("Form submission started");
-    dispatch(register(name, email, password, navigate));
+    dispatch(register(name, email, password,confirmPassword, navigate));
     dispatch(setSignupData(formData));
     console.log("Signup successful:", formData);
 

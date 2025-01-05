@@ -13,7 +13,7 @@ export const registerUser = async (req, res) => {
     const { name, email, password, confirmPassword } = req.body;
 
     if (!name || !email || !password || !confirmPassword) {
-      return res.status(403).send({
+      return res.status(403).json({
         success: false,
         message: "All Fields are required",
       });
@@ -44,14 +44,29 @@ export const registerUser = async (req, res) => {
       profilePicture: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`,
     });
 
-    // Generate token and create cookie
-    generateToken(user._id, res);
+    // Generate token
+    const token = generateToken(user._id);
 
-    //send response
+    // Set cookie (optional, can be removed if cookies are not required)
+    res.cookie("token", token, {
+      maxAge: 3 * 60 * 60 * 24 * 1000, // 3 days
+      httpOnly: true,
+      sameSite: "Strict",
+      // secure: process.env.NODE_ENV === "production", // Uncomment for production
+    });
+
+    // Send response with token
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      user,
+      token, // Include token here
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
+      },
     });
   } catch (error) {
     console.error(`Error while registering user: ${error.message}`);
@@ -69,7 +84,7 @@ export const loginUser = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: `Please Fill up All the Required Fields`,
+        message: "Please Fill up All the Required Fields",
       });
     }
 
@@ -77,7 +92,7 @@ export const loginUser = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: `User is not Registered with Us Please SignUp to Continue`,
+        message: "User is not Registered with Us Please SignUp to Continue",
       });
     }
 
@@ -88,13 +103,30 @@ export const loginUser = async (req, res) => {
         message: "Invalid password",
       });
     }
-    generateToken(user._id, res); // Generate token and create cookie
 
-    console.log(user);
+    // Generate token
+    const token = generateToken(user._id); // Get token from generateToken function
+
+    // Set cookie (optional)
+    res.cookie("token", token, {
+      maxAge: 3 * 60 * 60 * 24 * 1000, // 3 days
+      httpOnly: true,
+      sameSite: "Strict",
+      // secure: process.env.NODE_ENV === "production", // Uncomment for production
+    });
+
+    // Send response with token and user details
     res.status(200).json({
       success: true,
       message: "User logged in successfully",
-      user,
+      token, // Include token in response body
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        bio: user.bio,
+        profilePicture: user.profilePicture,
+      },
     });
   } catch (error) {
     console.error(`Error while logging in user: ${error.message}`);

@@ -24,19 +24,26 @@ export function register(name, email, password, confirmPassword, navigate) {
         password,
         confirmPassword,
       });
-      console.log("API Response:", response); // Debug
-
+    
+      console.log("Raw API Response:", response);
+      console.log("Response Data:", response.data);
+    
       if (!response.data.success) {
-        throw new Error(response.data.message);
+        throw new Error(response.data.message || "Signup failed");
       }
-
-      toast.success("Signup Successful!");
+    
+      const token = response.data.token;
+      if (!token) {
+        throw new Error("Token not received");
+      }
+    
+      dispatch(setToken(token)); // Save token to Redux and localStorage
+      console.log("Token stored successfully:", token);
       navigate("/all");
     } catch (error) {
-      console.error("Error in register function:", error); // Debug
-      const errorMessage = error?.response?.data?.message || error.message || "Signup Failed";
-      toast.error(errorMessage);
-    } finally {
+      console.error("Error in register function:", error);
+    }
+     finally {
       dispatch(setLoading(false));
       toast.dismiss(toastId);
     }

@@ -1,7 +1,4 @@
 import { useState } from "react";
-import "./App.css";
-
-
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -10,6 +7,9 @@ import Navbar from "./components/common/Navbar";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import All from "./pages/All";
+import PrivateRoute from "./components/core/Auth/PrivateRoute";
+import Explore from "./pages/Explore";
+import CreatePost from "./components/core/Posts/CreatePost";
 
 function App() {
   const dispatch = useDispatch();
@@ -23,7 +23,15 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
-        <Route path="/all" element={<All />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/all" element={
+          <PrivateRoute>
+            <All />
+           </PrivateRoute>
+        } />
+
+
+        <Route path="/create" element = {<CreatePost/>} />
       </Routes>
     </div>
 

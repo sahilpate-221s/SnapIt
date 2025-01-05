@@ -20,13 +20,12 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="bg-white p-3 shadow-md ">
+    <nav className="sticky top-0 z-50 bg-white h-20 shadow-md flex items-center">
       <div className="container mx-auto flex justify-between items-center w-11/12 max-w-maxContent">
         {/* Left Section: Logo and Search or Navigation Links */}
         <div className="flex items-center space-x-4">
-          <img src={logo} alt="Logo" className="h-8" /> {/* Adjusted to h-8 for consistent aspect ratio */}
-          
-          {/* Render search box if token exists (user is logged in) */}
+          <img src={logo} alt="Logo" className="h-12" />{" "}
+          {/* Adjusted logo size for taller navbar */}
           {token ? (
             <div className="relative items-center hidden md:flex">
               <input
@@ -39,7 +38,6 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            // Render nav items if token is not present (user is not logged in)
             <div className="hidden md:flex items-center space-x-1">
               {navItems.map((item) => (
                 <Link
@@ -61,7 +59,22 @@ const Navbar = () => {
         {/* Right Section: Navigation Links or ProfileDropdown */}
         <div className="flex items-center space-x-4 md:space-x-6">
           {token ? (
-            <ProfileDropdown /> // Render ProfileDropdown if token exists
+            <div className="hidden md:flex flex-row md:space-x-2 lg:space-x-6">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`${
+                    location.pathname === item.path
+                      ? "bg-gray-400 text-black"
+                      : "text-gray-600 hover:text-black"
+                  } px-2 py-1 rounded-md`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              <ProfileDropdown />
+            </div>
           ) : (
             <div className="hidden md:flex space-x-1">
               <Link
@@ -95,7 +108,6 @@ const Navbar = () => {
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out`}
       >
-        {/* Close Button */}
         <div className="flex justify-between items-center p-4 border-b border-gray-300">
           <img src={logo} alt="Logo" className="h-8" />
           <button className="text-black" onClick={() => setIsMenuOpen(false)}>
@@ -103,7 +115,6 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Navigation Links */}
         <div className="flex flex-col mt-4 space-y-2 px-4">
           {navItems.map((item) => (
             <Link
@@ -114,14 +125,13 @@ const Navbar = () => {
                   ? "bg-gray-400 text-black rounded-xl"
                   : "text-gray-600 hover:text-black hover:rounded-xl"
               } px-3 py-2`}
-              onClick={() => setIsMenuOpen(false)} // Close menu on link click
+              onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
             </Link>
           ))}
         </div>
 
-        {/* Conditional rendering for authentication links */}
         <div className="flex flex-col mt-4 space-y-2 px-4 border-t border-gray-300 pt-4">
           {token ? (
             <ProfileDropdown />
@@ -146,7 +156,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Overlay when menu is open */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
