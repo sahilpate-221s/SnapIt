@@ -40,7 +40,7 @@ function SignupForm() {
     }
 
     console.log("Form submission started");
-    dispatch(register(name, email, password,confirmPassword, navigate));
+    dispatch(register(name, email, password, confirmPassword, navigate));
     dispatch(setSignupData(formData));
     console.log("Signup successful:", formData);
 
@@ -54,21 +54,17 @@ function SignupForm() {
 
     // Success message
     toast.success("Signup Successful!");
-  
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Create Your Account
-        </h2>
-        <form onSubmit={handleOnSubmit} className="flex flex-col space-y-6">
-          {/* Name field */}
-          <div>
+    <div className="flex justify-center items-center h-[24rem]  mt-1 pt-0">
+      <div className="bg-white rounded-lg p-3 w-full max-w-md sm:w-[90%] sm:mx-6 md:mx-0">
+        <form onSubmit={handleOnSubmit} className="flex flex-col space-y-4">
+          {/* Name Field */}
+          <div className="relative">
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-600 mb-2"
+              className="block text-sm font-medium text-gray-800 mb-1"
             >
               Name
             </label>
@@ -80,15 +76,18 @@ function SignupForm() {
               value={name}
               onChange={handleOnChange}
               placeholder="Your full name"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full p-2 pr-10 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent"
             />
+            <span className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-400">
+              👤
+            </span>
           </div>
 
-          {/* Email field */}
-          <div>
+          {/* Email Field */}
+          <div className="relative">
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-600 mb-2"
+              className="block text-sm font-medium text-gray-800 mb-1"
             >
               Email Address
             </label>
@@ -100,15 +99,18 @@ function SignupForm() {
               value={email}
               onChange={handleOnChange}
               placeholder="example@example.com"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full p-2 pr-10 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent"
             />
+            <span className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-400">
+              ✉️
+            </span>
           </div>
 
-          {/* Password field */}
-          <div>
+          {/* Password Field */}
+          <div className="relative">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-600 mb-2"
+              className="block text-sm font-medium text-gray-800 mb-1"
             >
               Password
             </label>
@@ -120,15 +122,18 @@ function SignupForm() {
               value={password}
               onChange={handleOnChange}
               placeholder="Enter your password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full p-2 pr-10 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent"
             />
+            <span className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-400">
+              🔒
+            </span>
           </div>
 
-          {/* Confirm Password field */}
-          <div>
+          {/* Confirm Password Field */}
+          <div className="relative">
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-600 mb-2"
+              className="block text-sm font-medium text-gray-800 mb-1"
             >
               Confirm Password
             </label>
@@ -140,24 +145,27 @@ function SignupForm() {
               value={confirmPassword}
               onChange={handleOnChange}
               placeholder="Confirm your password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full p-2 pr-10 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent"
             />
+            <span className="absolute right-3 top-11 transform -translate-y-1/2 text-gray-400">
+              🔐
+            </span>
           </div>
 
           {/* Sign Up Button */}
           <button
             type="submit"
-            className="w-full py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition duration-300"
+            className="w-full py-2 px-6 text-white font-semibold rounded-lg bg-gradient-to-r from-gray-300 to-gray-900 hover:from-black hover:to-gray-500 shadow-lg hover:shadow-xl transform transition-all duration-300 ease-in-out hover:scale-105"
           >
             Sign Up
           </button>
 
-          {/* Already have an account? */}
-          <p className="text-center text-sm text-gray-600 mt-4">
+          {/* Already Have an Account */}
+          <p className="text-center text-sm text-gray-700 mt-4">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-green-500 font-medium hover:underline"
+              className="text-black font-medium hover:underline transition-all"
             >
               Login here
             </Link>

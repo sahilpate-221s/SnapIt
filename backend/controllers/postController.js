@@ -1,4 +1,5 @@
 import { Post } from "../model/postModel.js";
+import { User } from '../model/userModel.js';  // Make sure this path is correct
 import cloudinary from "cloudinary";
 import DataUriParser from "datauri/parser.js";
 
@@ -22,7 +23,7 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "No files uploaded" });
     }
 
-    // Log the uploaded files
+    // Log the uploaded files (optional, for debugging purposes)
     console.log("Files uploaded:", files);
 
     // Convert file buffers to Data URLs and upload to Cloudinary
@@ -32,9 +33,12 @@ export const createPost = async (req, res) => {
           file.originalname,
           file.buffer
         ).content;
-        const result = await cloudinary.v2.uploader.upload(fileContent, {
+
+        // Upload file to Cloudinary
+        const result = await cloudinary.uploader.upload(fileContent, {
           folder: folderName,
         });
+
         return {
           id: result.public_id,
           url: result.secure_url,
@@ -47,8 +51,13 @@ export const createPost = async (req, res) => {
       title,
       description,
       images: uploadedImages,
-      tags: tag, // Save a single tag
-      createdBy: req.user._id,
+      tags: [tag], // Wrap single tag in an array for consistency
+      createdBy: req.user._id, // Use req.user._id for the current user
+    });
+
+    // Update the user's posts array to include the new post
+    await User.findByIdAndUpdate(req.user._id, {
+      $push: { posts: newPost._id },
     });
 
     res.status(201).json({
@@ -59,11 +68,13 @@ export const createPost = async (req, res) => {
   } catch (error) {
     console.error("Error while creating post:", error);
     res.status(500).json({
+      success: false,
       message: "Error while creating post",
       error: error.message,
     });
   }
 };
+
 
 export const getAllPosts = async (req, res) => {
   try {

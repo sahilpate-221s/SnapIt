@@ -15,8 +15,7 @@ import college5 from "../assets/college5.png";
 import college6 from "../assets/college6.png";
 import college7 from "../assets/college7.png";
 
-
-import Footer from "../components/common/Footer"
+import Footer from "../components/common/Footer";
 import DownloadApp from "../components/common/DownloadApp";
 
 const Home = () => {
@@ -50,51 +49,51 @@ const Home = () => {
 
       {/* Image Grid */}
       <div className="flex flex-col md:flex-row flex-wrap mx-auto mt-10">
-        {/* First Image */}
-        <div className="h-[20rem]  w-[12rem] mt-4 md:m-3 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-          <img
-            src={college2}
-            alt="Campus Life 1"
-            className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
-          />
-        </div>
-
-        {/* Second Image */}
-        <div className="h-[20rem] lg:h-[16rem]  w-[12rem] mt-4 lg:mt-20 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-          <img
-            src={college5}
-            alt="Campus Life 2"
-            className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
-          />
-        </div>
-
-        {/* Third Image */}
-        <div className="h-[20rem] lg:h-[13rem]  w-[12rem] mt-4 lg:mt-32 md:ml-3 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-          <img
-            src={college3}
-            alt="Campus Life 3"
-            className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
-          />
-        </div>
-
-        {/* Fourth Image */}
-        <div className="h-[20rem] md:h-[16rem]  w-[12rem] mt-4 md:ml-3 md:mt-20 overflow-hidden rounded-xl hidden lg:block shadow-lg hover:shadow-2xl transition-all duration-300">
-          <img
-            src={college1}
-            alt="Campus Life 4"
-            className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
-          />
-        </div>
-
-        {/* Fifth Image */}
-        <div className="h-[20rem] w-[12rem] mt-4 md:m-3 overflow-hidden rounded-xl hidden lg:block shadow-lg hover:shadow-2xl transition-all duration-300">
-          <img
-            src={college4}
-            alt="Campus Life 5"
-            className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
-          />
-        </div>
+      {/* First Image */}
+      <div className="h-[20rem] w-[12rem] mt-4 md:m-3 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-slideUp delay-100">
+        <img
+          src={college2}
+          alt="Campus Life 1"
+          className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
+        />
       </div>
+
+      {/* Second Image */}
+      <div className="h-[20rem] lg:h-[16rem] w-[12rem] mt-4 lg:mt-20 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-slideUp delay-200">
+        <img
+          src={college5}
+          alt="Campus Life 2"
+          className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
+        />
+      </div>
+
+      {/* Third Image */}
+      <div className="h-[20rem] lg:h-[13rem] w-[12rem] mt-4 lg:mt-32 md:ml-3 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 animate-slideUp delay-300">
+        <img
+          src={college3}
+          alt="Campus Life 3"
+          className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
+        />
+      </div>
+
+      {/* Fourth Image */}
+      <div className="h-[20rem] md:h-[16rem] w-[12rem] mt-4 md:ml-3 md:mt-20 overflow-hidden rounded-xl hidden lg:block shadow-lg hover:shadow-2xl transition-all duration-300 animate-slideUp delay-400">
+        <img
+          src={college1}
+          alt="Campus Life 4"
+          className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
+        />
+      </div>
+
+      {/* Fifth Image */}
+      <div className="h-[20rem] w-[12rem] mt-4 md:m-3 overflow-hidden rounded-xl hidden lg:block shadow-lg hover:shadow-2xl transition-all duration-300 animate-slideUp delay-500">
+        <img
+          src={college4}
+          alt="Campus Life 5"
+          className="object-cover w-full h-full cursor-pointer transition-transform transform hover:scale-105 hover:brightness-110"
+        />
+      </div>
+    </div>
 
       {/* Info grid - save images you like */}
       <div className="w-11/12 flex flex-col md:flex-row mx-auto mt-16 gap-8 lg:gap-4">
@@ -147,7 +146,6 @@ const Home = () => {
 
       {/* Info grid 2 - save images you like */}
       <div className="w-11/12 flex flex-col-reverse md:flex-row mx-auto mt-16 gap-8 lg:gap-4">
-        
         {/* Image Section */}
         <div className="flex items-center justify-center w-full md:w-1/2">
           <div className="flex flex-row gap-4 items-center">
@@ -180,10 +178,11 @@ const Home = () => {
         {/* Text Section */}
         <div className="flex flex-col items-center justify-center text-center w-full md:w-1/2">
           <section className="text-5xl font-caveat">
-          Explore it, embrace it, live it.
+            Explore it, embrace it, live it.
           </section>
           <p className="mt-4 text-sm text-gray-600 pb-10">
-          Connect with the vibrant stories and moments that make university life unforgettable.
+            Connect with the vibrant stories and moments that make university
+            life unforgettable.
           </p>
           <div className="sm:mt-0 md:mt-4">
             <Link to="/explore">
@@ -193,10 +192,7 @@ const Home = () => {
             </Link>
           </div>
         </div>
-
-
       </div>
-
 
       {/* dowload the app from play store and app store */}
 

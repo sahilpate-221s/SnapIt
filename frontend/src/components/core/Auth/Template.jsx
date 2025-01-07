@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for programmatic routing
 import LoginForm from "../Auth/LoginForm";
 import SignupForm from "../Auth/SignupForm";
+
 function Template({ title, description, formType }) {
   const [isOpen, setIsOpen] = useState(true); // State to manage modal visibility
   const modalRef = useRef(null); // Reference for modal content
@@ -30,19 +31,19 @@ function Template({ title, description, formType }) {
   if (!isOpen) return null; // If the modal is closed, render nothing
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50 sm:mx-6 md:mx-0">
       <div
         ref={modalRef}
-        className="bg-white p-6 rounded-lg shadow-lg max-w-lg mx-auto space-y-6 sm:max-w-md sm:space-y-4"
+        className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full sm:max-w-md sm:mx-6 md:mx-0 lg:mx-0  "
       >
-        <h2 className="text-xl font-semibold mb-4">{title}</h2>
-        <p className="mb-6">{description}</p>
+        <h2 className="md:text-2xl sm:text-sm font-semibold mb-3 font-diphylleia text-center">
+          {title}
+        </h2>
+        <p className="mb-6 font-diphylleia text-center sm:text-xs md:text-sm ">
+          {description}
+        </p>
 
-        {formType === "signup" ? (
-          <SignupForm />
-        ) : (
-         <LoginForm />
-        )}
+        {formType === "signup" ? <SignupForm /> : <LoginForm />}
       </div>
     </div>
   );

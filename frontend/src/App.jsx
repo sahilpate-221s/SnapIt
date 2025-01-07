@@ -10,6 +10,7 @@ import All from "./pages/All";
 import PrivateRoute from "./components/core/Auth/PrivateRoute";
 import Explore from "./pages/Explore";
 import CreatePost from "./components/core/Posts/CreatePost";
+import Error from "./pages/Error";
 
 function App() {
   const dispatch = useDispatch();
@@ -24,20 +25,26 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
         <Route path="/explore" element={<Explore />} />
-        <Route path="/all" element={
-          <PrivateRoute>
-            <All />
-           </PrivateRoute>
-        } />
+        <Route
+          path="/all"
+          element={
+            <PrivateRoute>
+              <All />
+            </PrivateRoute>
+          }
+        />
 
-
-        <Route path="/create" element = {<CreatePost/>} />
+        <Route
+          path="/create"
+          element={
+            <PrivateRoute>
+              <CreatePost />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/error" element={<Error />} />
       </Routes>
     </div>
-
-    
-
-    
   );
 }
 
