@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
-import { setSignupData } from "../../../slices/authSlice";
 import { register } from "../../../services/operations/authAPI";
 
 function SignupForm() {
@@ -41,7 +40,7 @@ function SignupForm() {
 
     console.log("Form submission started");
     dispatch(register(name, email, password, confirmPassword, navigate));
-    dispatch(setSignupData(formData));
+    toast.success("Signup Successful!");
     console.log("Signup successful:", formData);
 
     // Reset the form

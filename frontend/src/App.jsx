@@ -11,6 +11,7 @@ import PrivateRoute from "./components/core/Auth/PrivateRoute";
 import Explore from "./pages/Explore";
 import CreatePost from "./components/core/Posts/CreatePost";
 import Error from "./pages/Error";
+import LoggedHomePage from "./components/core/Posts/LoggedHomePage";
 
 function App() {
   const dispatch = useDispatch();
@@ -40,6 +41,15 @@ function App() {
             <PrivateRoute>
               <CreatePost />
             </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/allPosts"
+          element={
+            <PrivateRoute>
+            <LoggedHomePage />
+             </PrivateRoute>
           }
         />
         <Route path="/error" element={<Error />} />

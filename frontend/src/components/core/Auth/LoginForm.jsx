@@ -26,10 +26,7 @@ const LoginForm = () => {
 
   const handleOnSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
     dispatch(login(email, password, navigate));
-
-    setIsLoading(false);
   };
 
   return (

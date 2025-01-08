@@ -1,32 +1,33 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { User } from "../model/userModel.js";
-import generateToken from "../utils/generateToken.js";
-import { Post } from "../model/postModel.js";
-import { uploadImageToCloudinary } from "../utils/imageUploader.js";
-import { Collection } from "../model/collectionModel.js";
 import dotenv from "dotenv";
 
 dotenv.config();
+
+const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
 
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
 
+    // Validate input fields
     if (!name || !email || !password || !confirmPassword) {
       return res.status(403).json({
         success: false,
-        message: "All Fields are required",
+        message: "All fields are required",
       });
     }
 
+    // Check if password and confirm password match
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message:
-          "Password and Confirm Password do not match. Please try again.",
+        message: "Password and confirm password do not match. Please try again.",
       });
     }
 
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -35,41 +36,43 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      bio: null,
+      bio: "", // Empty default bio
       profilePicture: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`,
     });
 
-    // Generate token
-    const token = generateToken(user._id);
-
-    // Set cookie (optional, can be removed if cookies are not required)
-    res.cookie("token", token, {
-      maxAge: 3 * 60 * 60 * 24 * 1000, // 3 days
-      httpOnly: true,
-      sameSite: "Strict",
-      // secure: process.env.NODE_ENV === "production", // Uncomment for production
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN || "1h", // Default expiry 1 hour
     });
 
-    // Send response with token
+    // Set token in HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Ensures cookie is not accessible via JavaScript
+      sameSite: "strict", // Prevents CSRF attacks
+      maxAge: 24 * 60 * 60 * 1000, // 1 day expiry
+      path:"/", 
+    });
+
+    // Do not send password or token in the response body
+    user.password = undefined;
+
+    // Respond with success message
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token, // Include token here
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        bio: user.bio,
-        profilePicture: user.profilePicture,
-      },
+      user,
+      token,
     });
   } catch (error) {
-    console.error(`Error while registering user: ${error.message}`);
+    console.error(`Error while registering user: ${error.message}`, error);
     res.status(500).json({
       success: false,
       message: "Internal server error while registering user",
@@ -77,25 +80,29 @@ export const registerUser = async (req, res) => {
   }
 };
 
+
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validate input fields
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Please Fill up All the Required Fields",
+        message: "Please fill up all the required fields",
       });
     }
 
-    const user = await User.findOne({ email: email });
+    // Check if user exists
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "User is not Registered with Us Please SignUp to Continue",
+        message: "User is not registered with us. Please sign up to continue",
       });
     }
 
+    // Compare the password with the hashed password
     const comparePassword = await bcrypt.compare(password, user.password);
     if (!comparePassword) {
       return res.status(400).json({
@@ -104,32 +111,31 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    // Generate token
-    const token = generateToken(user._id); // Get token from generateToken function
-
-    // Set cookie (optional)
-    res.cookie("token", token, {
-      maxAge: 3 * 60 * 60 * 24 * 1000, // 3 days
-      httpOnly: true,
-      sameSite: "Strict",
-      // secure: process.env.NODE_ENV === "production", // Uncomment for production
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN || "24h", // Token expiry time
     });
 
-    // Send response with token and user details
+    // Set token in HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Makes cookie inaccessible to client-side JavaScript
+      sameSite: "strict", // Helps prevent CSRF attacks
+      maxAge: 24 * 60 * 60 * 1000, // Cookie expires in 1 day
+      path:"/",
+    });
+
+    // Do not expose password in the response
+    user.password = undefined;
+
+    // Send successful login response
     res.status(200).json({
       success: true,
       message: "User logged in successfully",
-      token, // Include token in response body
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        bio: user.bio,
-        profilePicture: user.profilePicture,
-      },
+      user,
+      token,
     });
   } catch (error) {
-    console.error(`Error while logging in user: ${error.message}`);
+    console.error(`Error while logging in user: ${error.message}`, error);
     res.status(500).json({
       success: false,
       message: "Internal server error while logging in user",
