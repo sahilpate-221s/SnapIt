@@ -11,8 +11,7 @@ import {
 } from "react-icons/fa";
 import { useSelector } from "react-redux";
 
-const PostCard = ({ post, onLike, onAddComment, onDeleteComment }) => {
-  const [isLiked, setIsLiked] = useState(false);
+const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -22,29 +21,6 @@ const PostCard = ({ post, onLike, onAddComment, onDeleteComment }) => {
 
   const { user } = useSelector((state) => state.profile);
   const profilePic = user.profilePicture;
-
-  // Handle Like functionality
-  const handleLike = async () => {
-    try {
-      // Optimistically update the UI
-      const updatedLikeStatus = !isLiked;
-      setIsLiked(updatedLikeStatus);
-      setLikesCount((prev) => prev + (updatedLikeStatus ? 1 : -1));
-
-      // Call the onLike function to update the backend
-      const updatedPost = await onLike(post._id, updatedLikeStatus);
-
-      // If the update was successful, sync the likes count with the updated post
-      if (updatedPost) {
-        setLikesCount(updatedPost.likes.length);
-      }
-    } catch (error) {
-      console.error("Error liking the post:", error);
-      // Revert the optimistic UI changes if there's an error
-      setIsLiked(!isLiked);
-      setLikesCount((prev) => prev + (isLiked ? -1 : 1));
-    }
-  };
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prevIndex) =>
@@ -169,14 +145,9 @@ const PostCard = ({ post, onLike, onAddComment, onDeleteComment }) => {
             </div>
 
             <div className="flex items-center mb-4">
-              <button
-                onClick={handleLike}
-                className="w-7 h-10 flex items-center rounded-full transition duration-300 ease-in-out"
-              >
+              <button className="w-7 h-10 flex items-center rounded-full transition duration-300 ease-in-out">
                 <FaHeart
-                  className={`text-xl transition-all duration-300 ${
-                    isLiked ? "text-red-500" : "text-gray-600"
-                  }`}
+                  className={`text-xl transition-all duration-300 text-red-500`}
                 />
               </button>
               <span className="text-lg font-semibold text-gray-700">
@@ -294,7 +265,7 @@ const PostCard = ({ post, onLike, onAddComment, onDeleteComment }) => {
 
       {/* Fullscreen Modal */}
       {showModal && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-85 flex items-center justify-center z-50">
           <div className="relative w-full max-w-4xl sm:max-w-2xl">
             <img
               src={post.images[currentImageIndex]?.url || ""}
@@ -330,4 +301,4 @@ const PostCard = ({ post, onLike, onAddComment, onDeleteComment }) => {
   );
 };
 
-export default PostCard;
+export default UserPostCard;

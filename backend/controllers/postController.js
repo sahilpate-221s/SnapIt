@@ -1,5 +1,5 @@
 import { Post } from "../model/postModel.js";
-import { User } from '../model/userModel.js';  // Make sure this path is correct
+import { User } from "../model/userModel.js"; // Make sure this path is correct
 import cloudinary from "cloudinary";
 import DataUriParser from "datauri/parser.js";
 
@@ -75,7 +75,6 @@ export const createPost = async (req, res) => {
   }
 };
 
-
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find().sort({ createdAt: -1 });
@@ -95,19 +94,27 @@ export const getAllPosts = async (req, res) => {
 // Get a single post by ID
 export const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate(
-      "createdBy",
-      "-password"
-    );
+    const post = await Post.findById(req.params.id)
+      .populate("createdBy", "name profilePicture") // Populate post creator's name and profilePicture
+      .populate({
+        path: "comments.user", // Populate the user field in comments
+        select: "name profilePicture", // Only select the name and profilePicture for the comment user
+      });
+
     if (!post) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
       });
     }
+
+    // Debugging: Log the populated post data
+    console.log("Populated Post Data:", post);
+
     res.status(200).json({
       success: true,
       post,
+      likesCount: post.likes.length, // Include likes count
     });
   } catch (error) {
     console.error(`Error while getting post: ${error.message}`);
@@ -118,7 +125,7 @@ export const getPostById = async (req, res) => {
   }
 };
 
-// // Update a post
+// Update a post
 export const updatePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -205,13 +212,22 @@ export const addComment = async (req, res) => {
       });
     }
 
-    post.comments.push({ user: req.user._id, text });
+    const comment = { user: req.user._id, text }; // Add comment with the user's ID
+    post.comments.push(comment); // Push the comment to the post
     await post.save();
+
+    // Populate the comments with user details
+    const updatedPost = await Post.findById(req.params.id).populate({
+      path: "comments.user", // Populate the user field in comments
+      select: "name profilePicture", // Only select the name and profilePicture for the comment user
+    });
+    console.log(updatedPost);
+    console.log(comment.user.name);
 
     res.status(200).json({
       success: true,
       message: "Comment added successfully",
-      post,
+      post: updatedPost,
     });
   } catch (error) {
     console.error(`Error while adding comment: ${error.message}`);
@@ -225,7 +241,6 @@ export const addComment = async (req, res) => {
 // React to a post
 export const reactToPost = async (req, res) => {
   try {
-    const { emoji } = req.body;
     const post = await Post.findById(req.params.id);
 
     if (!post) {
@@ -235,19 +250,45 @@ export const reactToPost = async (req, res) => {
       });
     }
 
-    post.reactions.push({ user: req.user._id, emoji });
+    const userId = req.user._id.toString(); // Current user ID
+
+    // Check if the user has already liked the post
+    const likeIndex = post.likes.indexOf(userId);
+
+    if (likeIndex !== -1) {
+      // If the user has already liked the post, remove the like (unlike logic)
+      post.likes.splice(likeIndex, 1);
+      await post.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Post unliked successfully",
+        post: {
+          ...post.toObject(),
+          liked: false, // Include the 'liked' status
+        },
+        likesCount: post.likes.length, // Return only the likes count
+      });
+    }
+
+    // Otherwise, add a like
+    post.likes.push(userId);
     await post.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Reaction added successfully",
-      post,
+      message: "Post liked successfully",
+      post: {
+        ...post.toObject(),
+        liked: true, // Include the 'liked' status
+      },
+      likesCount: post.likes.length, // Return only the likes count
     });
   } catch (error) {
-    console.error(`Error while reacting to post: ${error.message}`);
+    console.error(`Error while liking/unliking post: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: "Internal server error while reacting to post",
+      message: "Internal server error while liking/unliking post",
     });
   }
 };

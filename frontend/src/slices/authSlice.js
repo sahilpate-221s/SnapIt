@@ -20,10 +20,6 @@ const authSlice = createSlice({
       console.log("Setting token:", action.payload); // Debugging
       state.token = action.payload; // Optionally store token if needed (but not in localStorage)
     },
-    // You might want an action to clear the token on logout
-    clearToken(state) {
-      state.token = null;
-    }
   },
 });
 

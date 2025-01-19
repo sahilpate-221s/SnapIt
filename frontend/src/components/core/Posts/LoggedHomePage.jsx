@@ -7,79 +7,101 @@ import {
   addComment,
   deleteComment,
   deletePost,
+  fetchSinglePost,
 } from "../../../services/operations/PostAPI";
-import { setLoading } from "../../../slices/postSlice"; // Import setLoading from the correct slice
-import { Loading } from "../../common/Loading";
-import Masonry from "react-masonry-css"; // Importing the Masonry layout
-import PostCard from "./PostCard"; // Importing the PostCard component
+import { Loading } from "../../common/Loading"; // Loading component
+import Masonry from "react-masonry-css"; // Masonry layout for grid
+import PostCard from "./PostCard"; // PostCard component for detailed view
+import { setSelectedPost } from "../../../slices/postSlice"; // Action to set selected post in Redux
 
 const LoggedHomePage = () => {
   const dispatch = useDispatch();
-  const posts = useSelector((state) => state.posts.posts || []); // Default to an empty array
-  const loading = useSelector((state) => state.posts.loading); // Getting loading state from Redux
-  const [selectedPost, setSelectedPost] = useState(null); // State for the selected post modal
+  const user = useSelector((state) => state.profile.user);
+  const posts = useSelector((state) => state.posts.posts || []); // Default to empty array
+  const selectedPost = useSelector((state) => state.posts.selectedPost); // Access selected post from Redux
+  const [loading, setLoading] = useState(false); // Loading state
 
+  // Load posts when the component mounts
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        dispatch(setLoading(true)); // Set loading state to true
-        dispatch(fetchAllPosts());
+        setLoading(true); // Show loading spinner before the fetch call
+        dispatch(fetchAllPosts()); // Fetch posts from the API
       } catch (error) {
         toast.error("Failed to load posts. Please try again.");
       } finally {
-        dispatch(setLoading(false)); // Set loading state to false after the request completes
+        setLoading(false); // Hide loading spinner after the fetch is complete
       }
     };
 
     loadPosts();
   }, [dispatch]);
 
-  const handleImageClick = (post) => {
-    setSelectedPost(post); // Set the selected post for the modal
+  // Handle image click to open modal with post details
+  const handleImageClick = async (post) => {
+    await dispatch(fetchSinglePost(post._id)); // Fetch the latest post data including comments
+    dispatch(setSelectedPost(post)); // Update Redux state with selected post
   };
 
+  // Close the modal
   const closeModal = () => {
-    setSelectedPost(null); // Close the modal
+    dispatch(setSelectedPost(null)); // Reset the selected post in Redux when modal is closed
   };
 
-  const handleLike = (postId) => {
-    dispatch(likePost(postId)); // Like the post
+  // Handle like action
+  const handleLike = async (postId, isLiked) => {
+    try {
+      console.log("calling the likePost and the userId checking",user._id);
+      const updatedPost = await dispatch(likePost(postId, isLiked, posts, user._id));
+      if (updatedPost) {
+        console.log("Liked the post successfully:", updatedPost);
+      }
+    } catch (error) {
+      console.error("Error in handleLike:", error);
+    }
   };
+  
 
+  // Handle adding a comment to a post
   const handleAddComment = (postId, commentText) => {
-    dispatch(addComment(postId, commentText)); // Add comment to post
+    dispatch(addComment(postId, commentText,posts)); // Dispatch addComment action
   };
 
+  // Handle deleting a comment
   const handleDeleteComment = (postId, commentId) => {
-    dispatch(deleteComment(postId, commentId)); // Delete comment from post
+    dispatch(deleteComment(postId, commentId,posts)); // Dispatch deleteComment action
   };
 
+  // Handle deleting a post
   const handleDeletePost = (postId) => {
-    dispatch(deletePost(postId)); // Delete the post
+    dispatch(deletePost(postId)); // Dispatch deletePost action
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen w-11/12 mx-auto p-6">
       {/* Content Section */}
-      <div className="container mx-auto bg-white p-6 rounded-xl shadow-lg w-11/12">
+      <div className="container min-h-screen w-full mx-auto ">
         {loading ? (
           <Loading /> // Display Loading component while data is loading
         ) : posts.length > 0 ? (
           <Masonry
-            breakpointCols={{ default: 4, 1100: 3, 700: 2, 500: 1 }}
+            breakpointCols={{ default: 5, 1100: 3, 700: 2, 500: 1 }}
             className="my-masonry-grid"
             columnClassName="my-masonry-grid_column"
           >
             {posts.map((post) => (
-              <div key={post._id} className="bg-white shadow-lg rounded-lg p-4">
-                {/* Image */}
+              <div
+                key={post._id}
+                className="bg-white shadow-lg rounded-lg mb-6"
+              >
+                {/* Image Section */}
                 {post.images && post.images.length > 0 && (
                   <div className="relative">
                     <img
                       src={post.images[0].url}
                       alt={post.title}
-                      className="w-full object-cover rounded-lg mb-4 cursor-pointer"
-                      onClick={() => handleImageClick(post)} // Handle image click
+                      className="w-full object-cover rounded-lg cursor-pointer"
+                      onClick={() => handleImageClick(post)} // Open modal on image click
                     />
                     {post.images.length > 1 && (
                       <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
@@ -101,17 +123,16 @@ const LoggedHomePage = () => {
       {/* Modal for Full Post Details */}
       {selectedPost && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-          onClick={closeModal} // Close modal when clicking outside
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center overflow-y-auto z-30"
+          onClick={closeModal} // Close modal on click outside
         >
           <div
-            className="bg-white p-6 rounded-lg w-3/4 md:w-1/2 flex"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xl:h-[44rem]  p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
+            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
           >
-            {/* Render PostCard Component with the selected post */}
+            {/* PostCard Component for displaying post details */}
             <PostCard
               post={selectedPost}
-              closeModal={closeModal}
               onLike={handleLike}
               onAddComment={handleAddComment}
               onDeleteComment={handleDeleteComment}

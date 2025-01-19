@@ -1,10 +1,8 @@
-import { apiConnector } from "../apiconnector";
+import { useSelector } from "react-redux";
 import { postEndpoints } from "../apis";
-import { setLoading } from "../../slices/profileSlice";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { setPosts } from "../../slices/postSlice";
-import { useSelector } from "react-redux";
+import { setSelectedPost, setPosts } from "../../slices/postSlice";
 
 const {
   NEW_POST_API,
@@ -18,17 +16,9 @@ const {
 } = postEndpoints;
 
 export const createPost = (formData, navigate) => {
-  return async (dispatch) => {
-    console.log("createPost function called with ", formData);
+  return async (dispatch, getState) => {
     const toastId = toast.loading("Creating post...");
-    dispatch(setLoading(true));
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Please log in to create a post.");
-      navigate("/login");
-      return;
-    }
+    dispatch(setLoadingSlice(true));
 
     const config = {
       headers: {
@@ -42,25 +32,23 @@ export const createPost = (formData, navigate) => {
         throw new Error("Title, description, and files are required.");
       }
 
-      const response = await apiConnector(
-        "POST",
-        NEW_POST_API,
-        formData,
-        config
-      );
+      const response = await axios.post(NEW_POST_API, formData, config);
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Post creation failed");
       }
 
       toast.success(response.data.message || "Post created successfully!");
-      dispatch(addPost(response.data.post));
-      navigate("/all");
+      dispatch(setPosts(response.data.post));
+      dispatch(setPosts([response.data.post, ...posts])); // in dono me se koi ek dekhna hai
+      navigate("/");
     } catch (error) {
       console.error("Error in createPost function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoadingSlice(false));
       toast.dismiss(toastId);
     }
   };
@@ -80,7 +68,9 @@ export const fetchAllPosts = () => {
       dispatch(setPosts(response.data.posts));
     } catch (error) {
       console.error("Error in fetchAllPosts function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };
@@ -96,11 +86,13 @@ export const fetchSinglePost = (postId) => {
         throw new Error(response.data.message || "Failed to fetch post");
       }
 
-      // Assuming you have an action to set the single post
-      dispatch(setPosts(response.data.post));
+      dispatch(setSelectedPost(response.data.post));
+      return response.data;
     } catch (error) {
       console.error("Error in fetchSinglePost function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };
@@ -117,10 +109,11 @@ export const deletePost = (postId) => {
       }
 
       toast.success("Post deleted successfully!");
-      dispatch(fetchAllPosts()); // Re-fetch posts after deletion
     } catch (error) {
       console.error("Error in deletePost function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };
@@ -141,7 +134,11 @@ export const updatePost = (postId, formData) => {
         },
       };
 
-      const response = await axios.patch(UPDATE_POST_API(postId), formData, config);
+      const response = await axios.patch(
+        UPDATE_POST_API(postId),
+        formData,
+        config
+      );
 
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to update post");
@@ -151,12 +148,14 @@ export const updatePost = (postId, formData) => {
       dispatch(fetchAllPosts()); // Re-fetch posts after update
     } catch (error) {
       console.error("Error in updatePost function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };
 
-export const addComment = (postId, commentText) => {
+export const addComment = (postId, commentText,posts) => {
   return async (dispatch) => {
     try {
       const response = await axios.post(
@@ -169,16 +168,24 @@ export const addComment = (postId, commentText) => {
         throw new Error(response.data.message || "Failed to add comment");
       }
 
+      const updatedComments = response.data.post.comments;
+
+      const updatedPosts = posts.map((p) =>
+        p._id === postId ? { ...p, comments: updatedComments } : p
+      );
+
+      dispatch(setPosts(updatedPosts));
       toast.success("Comment added successfully!");
-      dispatch(fetchSinglePost(postId)); // Re-fetch the single post to update comments
     } catch (error) {
       console.error("Error in addComment function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };
 
-export const deleteComment = (postId, commentId) => {
+export const deleteComment = (postId, commentId,posts) => {
   return async (dispatch) => {
     try {
       const response = await axios.delete(
@@ -190,33 +197,59 @@ export const deleteComment = (postId, commentId) => {
         throw new Error(response.data.message || "Failed to delete comment");
       }
 
+      const updatedPosts = posts.map((post) => {
+        if (post._id === postId) {
+          return {
+            ...post,
+            comments: post.comments.filter((comment) => comment._id !== commentId),
+          };
+        }
+        return post;
+      });
+
+      dispatch(setPosts(updatedPosts));
       toast.success("Comment deleted successfully!");
-      dispatch(fetchSinglePost(postId)); // Re-fetch the single post to update comments
     } catch (error) {
       console.error("Error in deleteComment function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };
 
-export const likePost = (postId) => {
+export const likePost = (postId, isLiked, posts, userId) => {
   return async (dispatch) => {
     try {
       const response = await axios.post(
         REACT_TO_POST_API(postId),
-        { reaction: "like" },
+        {}, // Send the isLiked status in the request body
         { withCredentials: true }
       );
 
       if (!response.data.success) {
-        throw new Error(response.data.message || "Failed to like post");
+        throw new Error(
+          response.data.message || "Failed to update reaction on post"
+        );
       }
 
-      toast.success("Post liked!");
-      dispatch(fetchSinglePost(postId)); // Re-fetch the post to update likes
+      const updatedpostdata = posts.map(p=>
+        p._id === postId ? {
+          ...p,
+          likes:isLiked ? p.likes.filter(id=> id !== userId) : [...p.likes,userId]
+        } : p
+      )
+
+      // Dispatch the updated posts to the Redux store
+      dispatch(setPosts(updatedpostdata));
+      toast.success(response.data.message || "Reaction updated!");
+      return updatedpostdata;
+
     } catch (error) {
       console.error("Error in likePost function:", error);
-      toast.error(error.response?.data?.message || error.message || "Something went wrong");
+      toast.error(
+        error.response?.data?.message || error.message || "Something went wrong"
+      );
     }
   };
 };

@@ -1,4 +1,5 @@
 const BASE_URL = "http://localhost:4000/api/v1";
+// const BASE_URL = "http://192.168.208.80:4000/api/v1";
 
 // auth endpoints 
 export const endpoints = {

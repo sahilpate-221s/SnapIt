@@ -11,7 +11,7 @@
 body {
     padding: 0;
     margin: 0;
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
     overflow-x: hidden;
 }
 
@@ -43,10 +43,21 @@ body {
 }
 
 .my-masonry-grid_column {
-  padding-left: 30px; /* Adjust space between columns */
+  padding-left: 15px; /* Adjust space between columns */
   background-clip: padding-box;
 }
 
 .my-masonry-grid_column > div {
-  margin-bottom: 30px; /* Adjust space between rows */
+  margin-bottom: 10px; /* Adjust space between rows */
+}
+
+
+/* Hide scrollbar while maintaining scroll functionality */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Hide scrollbar in Webkit browsers (Chrome, Safari, etc.) */
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
 }

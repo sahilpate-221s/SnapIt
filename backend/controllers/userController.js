@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../model/userModel.js";
 import dotenv from "dotenv";
+import { Post } from "../model/postModel.js";
+import { Collection } from "../model/collectionModel.js";
 
 dotenv.config();
 
@@ -23,7 +25,8 @@ export const registerUser = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: "Password and confirm password do not match. Please try again.",
+        message:
+          "Password and confirm password do not match. Please try again.",
       });
     }
 
@@ -50,7 +53,7 @@ export const registerUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ id: user._id }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN || "1h", // Default expiry 1 hour
+      expiresIn: JWT_EXPIRES_IN || "24h", // Default expiry 24 hour
     });
 
     // Set token in HTTP-only cookie
@@ -58,7 +61,7 @@ export const registerUser = async (req, res) => {
       httpOnly: true, // Ensures cookie is not accessible via JavaScript
       sameSite: "strict", // Prevents CSRF attacks
       maxAge: 24 * 60 * 60 * 1000, // 1 day expiry
-      path:"/", 
+      path: "/",
     });
 
     // Do not send password or token in the response body
@@ -69,7 +72,7 @@ export const registerUser = async (req, res) => {
       success: true,
       message: "User registered successfully",
       user,
-      token,
+      token, // i should remove that
     });
   } catch (error) {
     console.error(`Error while registering user: ${error.message}`, error);
@@ -79,7 +82,6 @@ export const registerUser = async (req, res) => {
     });
   }
 };
-
 
 export const loginUser = async (req, res) => {
   try {
@@ -121,7 +123,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true, // Makes cookie inaccessible to client-side JavaScript
       sameSite: "strict", // Helps prevent CSRF attacks
       maxAge: 24 * 60 * 60 * 1000, // Cookie expires in 1 day
-      path:"/",
+      path: "/",
     });
 
     // Do not expose password in the response
@@ -132,7 +134,7 @@ export const loginUser = async (req, res) => {
       success: true,
       message: "User logged in successfully",
       user,
-      token,
+      token, //should remove that
     });
   } catch (error) {
     console.error(`Error while logging in user: ${error.message}`, error);

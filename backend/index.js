@@ -18,6 +18,7 @@ app.use(cookieParser());
 app.use(
 	cors({
 		origin: 'http://localhost:5173',
+		// origin: 'http://192.168.208.80:5173',
 		credentials: true,
 	})
 );
@@ -34,6 +35,10 @@ app.use("/api/v1/posts", postRoutes);
 app.use("/api/v1/collection", collectionRoutes);
 
 
+// app.get("/", (req, res) => {
+// 	res.send("Hello");
+//   });
+  
 // start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

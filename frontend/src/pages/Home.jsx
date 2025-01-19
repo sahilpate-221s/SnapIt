@@ -34,11 +34,11 @@ const Home = () => {
       </p>
 
       {/* Search Box */}
-      <div className="flex items-center space-x-4 mx-auto">
-        <div className="relative flex flex-row items-center">
+      <div className="flex items-center space-x-4 mx-auto w-full ">
+        <div className="relative mx-auto flex flex-row items-center">
           <input
             type="text"
-            className="border md:w-[30rem] lg:w-[40rem] text-xl h-10 rounded-3xl pl-4 font-diphylleia bg-gray-200"
+            className="border w-full md:w-[30rem] lg:w-[40rem] text-xl h-10 rounded-3xl pl-4 font-diphylleia bg-gray-200 sm:mx-auto"
             placeholder="Search"
           />
           <div className="absolute right-4 text-white bg-gray-400 p-2 rounded-full">

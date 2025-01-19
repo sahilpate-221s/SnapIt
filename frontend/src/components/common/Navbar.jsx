@@ -8,6 +8,7 @@ import ProfileDropdown from "../core/Auth/ProfileDropdown"; // Import the Profil
 
 const Navbar = () => {
   const { token } = useSelector((state) => state.auth); // Get token from Redux state
+  // console.log("token from the auth state", token);
   const { user } = useSelector((state) => state.profile); // Get user info from Redux state
   const location = useLocation(); // Get the current route
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Manage menu toggle for mobile
@@ -20,7 +21,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-white h-20 shadow-md flex items-center">
+    <nav className="sticky top-0 z-10 bg-white shadow-md h-20 flex items-center w-full">
       <div className="container mx-auto flex justify-between items-center w-11/12 max-w-maxContent">
         {/* Left Section: Logo and Search or Navigation Links */}
         <div className="flex items-center space-x-4">
@@ -40,41 +41,43 @@ const Navbar = () => {
           ) : (
             <div className="hidden md:flex items-center space-x-1">
               {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`${
-                    location.pathname === item.path
-                      ? "bg-gray-400 text-black"
-                      : "text-gray-600 hover:text-black"
-                  } px-2 py-1 rounded-md`}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`${
+                  location.pathname === item.path
+                    ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
+                    : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
+                } flex items-center justify-center px-4 py-3 rounded-lg`} // Adjusted px value for a more balanced look
+              >
+                <p className="font-semibold">{item.name}</p>
+              </Link>
+            ))}
             </div>
           )}
         </div>
 
         {/* Right Section: Navigation Links or ProfileDropdown */}
-        <div className="flex items-center space-x-4 md:space-x-6">
+        <div className="flex items-center space-x-4 md:space-x-3">
           {token ? (
-            <div className="hidden md:flex flex-row md:space-x-2 lg:space-x-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`${
-                    location.pathname === item.path
-                      ? "bg-gray-400 text-black"
-                      : "text-gray-600 hover:text-black"
-                  } px-2 py-1 rounded-md`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <ProfileDropdown />
-            </div>
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`${
+                  location.pathname === item.path
+                    ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
+                    : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
+                } flex items-center justify-center px-4 py-3 rounded-lg`} // Adjusted px value for a more balanced look
+              >
+                <p className="font-semibold">{item.name}</p>
+              </Link>
+            ))}
+            <ProfileDropdown />
+          </div>
+          
+          
           ) : (
             <div className="hidden md:flex space-x-1">
               <Link

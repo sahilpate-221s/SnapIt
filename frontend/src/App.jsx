@@ -12,28 +12,22 @@ import Explore from "./pages/Explore";
 import CreatePost from "./components/core/Posts/CreatePost";
 import Error from "./pages/Error";
 import LoggedHomePage from "./components/core/Posts/LoggedHomePage";
+import Dashboard from "./components/core/Dashboard/Dashboard";
 
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.profile);
+  const { token } = useSelector((state) => state.auth); // token
   return (
     <div className="w-screen min-h-screen">
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={token ? <LoggedHomePage /> : <Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
         <Route path="/explore" element={<Explore />} />
-        <Route
-          path="/all"
-          element={
-            <PrivateRoute>
-              <All />
-            </PrivateRoute>
-          }
-        />
 
         <Route
           path="/create"
@@ -45,11 +39,11 @@ function App() {
         />
 
         <Route
-          path="/allPosts"
+          path="/dashboard"
           element={
             <PrivateRoute>
-            <LoggedHomePage />
-             </PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
           }
         />
         <Route path="/error" element={<Error />} />
