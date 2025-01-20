@@ -6,10 +6,13 @@ import {
   fetchAllPosts,
   deletePost,
   fetchSinglePost,
+  deleteComment,
+  addComment,
 } from "../../../services/operations/PostAPI";
 import UserPostCard from "./UserPostCard"; // Modal for post details
 import { setSelectedPost } from "../../../slices/postSlice"; // Redux action to set the selected post
 import { Loading } from "../../common/Loading"; // Loading spinner
+import Footer from "../../common/Footer";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -62,6 +65,15 @@ const Dashboard = () => {
       toast.error("Failed to delete post. Please try again.");
     }
   };
+
+   const handleAddComment = (postId, commentText) => {
+      dispatch(addComment(postId, commentText,posts)); // Dispatch addComment action
+      // toast.success("comment addded successfully.");
+    };
+
+    const handleDeleteComment = (postId, commentId) => {
+        dispatch(deleteComment(postId, commentId,posts)); // Dispatch deleteComment action
+      };
 
   return (
     <div className="min-h-screen bg-gray-50 w-11/12 mx-auto p-6">
@@ -125,7 +137,7 @@ const Dashboard = () => {
             You have no posts yet!
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 cursor-pointer">
             {userPosts.map((post) => (
               <div
                 key={post._id}
@@ -151,7 +163,7 @@ const Dashboard = () => {
       {/* Modal for Post Details */}
       {selectedPost && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30 "
           onClick={closeModal} // Close modal on click outside
         >
           <div
@@ -160,12 +172,17 @@ const Dashboard = () => {
           >
             <UserPostCard
               post={selectedPost}
-              onDelete={handleDeletePost}
+              onDeletePost={handleDeletePost}
+              onDeleteComment={handleDeleteComment}
+              onAddComment ={handleAddComment}
               onClose={closeModal}
             />
+            
+
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };

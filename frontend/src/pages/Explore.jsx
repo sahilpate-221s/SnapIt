@@ -45,11 +45,11 @@ const Explore = () => {
       <span className="sm:text-sm text-xl lg:text-2xl text-gray-500 font-diphylleia lg:ml-12 lg:mb-12 mt-4">
         Explore the best from the university
       </span>
-      <div className="container mx-auto md:mt-5 lg:mt-0">
+      <div className="container mx-auto md:mt-5 lg:mt-0 ">
         {/* Split Layout */}
         <div className="flex flex-col md:flex-row gap-4 lg:m-6 md:mb-12">
           {/* Left Side (2x2 Grid) */}
-          <div className="w-full md:w-1/2 grid grid-cols-2 gap-4">
+          <div className="w-full md:w-1/2 grid grid-cols-2 gap-4 cursor-pointer">
             {shuffledPosts.slice(0, 4).map((post, index) => (
               <div
                 key={index}
@@ -68,7 +68,7 @@ const Explore = () => {
           </div>
 
           {/* Right Side (Single Div with Height Equal to Left Side) */}
-          <div className="w-full md:w-1/2 h-[25rem] rounded-2xl overflow-hidden shadow-lg relative hover:scale-105 transition-transform duration-300">
+          <div className="w-full md:w-1/2 h-[25rem] rounded-2xl overflow-hidden shadow-lg relative hover:scale-105 transition-transform duration-300 cursor-pointer">
             <img
               src={shuffledPosts[4]?.images[0]?.url || "/placeholder.png"}
               alt="Div 5"
@@ -84,7 +84,7 @@ const Explore = () => {
         {!isSmallDevice && showMore && (
           <div className="flex flex-col md:flex-row gap-4 lg:m-6 lg:mt-20">
             {/* Left Side (Single Div with Height Equal to Right Side) */}
-            <div className="w-full md:w-1/2 h-[25rem] rounded-2xl overflow-hidden shadow-lg relative hover:scale-105 transition-transform duration-300">
+            <div className="w-full md:w-1/2 h-[25rem] rounded-2xl overflow-hidden shadow-lg relative hover:scale-105 transition-transform duration-300 cursor-pointer">
               <img
                 src={shuffledPosts[5]?.images[0]?.url || "/placeholder.png"}
                 alt="Div 5 (Reversed)"
@@ -96,7 +96,7 @@ const Explore = () => {
             </div>
 
             {/* Right Side (2x2 Grid) */}
-            <div className="w-full md:w-1/2 grid grid-cols-2 gap-4">
+            <div className="w-full md:w-1/2 grid grid-cols-2 gap-4 cursor-pointer">
               {shuffledPosts.slice(6, 10).map((post, index) => (
                 <div
                   key={index}

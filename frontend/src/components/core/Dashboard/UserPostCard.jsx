@@ -9,15 +9,30 @@ import {
   FaShareAlt,
   FaDownload,
 } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+import { FaSmile } from "react-icons/fa"; // Icon for emoji button
+import EmojiPicker from "emoji-picker-react";
 import { useSelector } from "react-redux";
 
-const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
+
+const UserPostCard = ({
+  post,
+  onAddComment,
+  onDeleteComment,
+  onDeletePost,
+}) => {
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(post.comments || []);
+  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false);
+
+  const handleEmojiClick = (emoji) => {
+    setNewComment((prev) => prev + emoji.emoji);
+    setShowEmojiPicker(false); // Close emoji picker after selection
+  };
 
   const { user } = useSelector((state) => state.profile);
   const profilePic = user.profilePicture;
@@ -81,6 +96,9 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
       alert("Comment cannot be empty.");
     }
   };
+  const handleDeltePost = () => {
+    onDeletePost(post._id);
+  };
 
   const handleDeleteComment = (commentId) => {
     // Call the onDeleteComment prop to remove comment from the backend
@@ -131,8 +149,8 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
         </div>
 
         {/* user profile and the likes things */}
-        <div className="w-full md:w-1/2 p-4 xl:p-6 xl:text-xl flex flex-col xl:h-[40rem]">
-          <div className="flex justify-between items-baseline">
+        <div className="w-full md:w-1/2 p-4 xl:p-6 xl:text-xl flex flex-col xl:h-[40rem] ">
+          <div className="flex justify-between items-baseline ">
             <div className="flex flex-row ">
               <img
                 src={profilePic || "default-profile-pic-url"}
@@ -144,7 +162,7 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
               </span>
             </div>
 
-            <div className="flex items-center mb-4">
+            <div className="flex items-center ">
               <button className="w-7 h-10 flex items-center rounded-full transition duration-300 ease-in-out">
                 <FaHeart
                   className={`text-xl transition-all duration-300 text-red-500`}
@@ -175,16 +193,23 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
                   >
                     <FaDownload className="mr-2" /> Download
                   </button>
+                  <button
+                    onClick={handleDeltePost}
+                    className="flex items-center text-sm text-red-500 hover:bg-gray-200 px-2 py-1 rounded"
+                  >
+                    {" "}
+                    <MdDelete className="mr-2" /> Delete Post
+                  </button>
                 </div>
               )}
             </div>
           </div>
 
           {/* title and the description part */}
-          <div className="flex flex-row items-baseline justify-between p-0">
-            <div className="text-3xl flex flex-col">
+          <div className="flex flex-row items-baseline justify-between ">
+            <div className="text-3xl flex flex-col font-serif">
               {post.title ? post.title : ""}
-              <div className="flex flex-col justify-center text-lg text-gray-900">
+              <div className="flex flex-col justify-center text-lg text-gray-900 font-diphylleia">
                 description: {post.description}
                 <div className="text-gray-800 text-xs">
                   <span className="text-black text-sm">Tags: </span>
@@ -196,13 +221,16 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
 
           {/* Comments Section */}
           {/* Comments Section */}
-          <div className="relative rounded-md border w-full mt-5 flex flex-col">
-            <span className="p-2 font-semibold text-lg">
+          {/* Comments Section */}
+          <div className="relative rounded-md border h-full w-full mt-3 flex flex-col bg-white shadow-sm">
+            {/* Comments Header */}
+            <span className="p-2 font-semibold text-sm text-gray-700 border-b">
               {comments.length} {comments.length === 1 ? "comment" : "comments"}
             </span>
 
-            {/* Comments List (displaying the comments in reverse order) */}
-            <div className="flex-1 space-y-3 px-2 py-2 overflow-y-auto max-h-[calc(100%-80px)] scrollbar-hidden">
+            {/* Comments List */}
+            {/* Comments List */}
+            <div className="flex-1 space-y-2 px-1 py-2 overflow-y-auto max-h-[calc(100%-90px)] scrollbar-hidden">
               {comments.length > 0 ? (
                 comments
                   .slice(0)
@@ -210,51 +238,78 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
                   .map((comment, index) => (
                     <div
                       key={index}
-                      className="flex items-start space-x-3 bg-gray-100 p-2 rounded-md"
+                      className="flex items-center justify-between bg-gray-100 p-1 rounded-lg"
                     >
-                      <img
-                        src={
-                          comment.user.profilePicture ||
-                          "default-profile-pic-url"
-                        }
-                        alt={comment.user.name || "User"}
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                      <div className="flex flex-row ">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-sm text-gray-800">
+                      {/* Comment Info */}
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={
+                            comment.user.profilePicture ||
+                            "default-profile-pic-url"
+                          }
+                          alt={comment.user.name || "User"}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                        <div className="text-sm">
+                          <span className="font-semibold text-gray-800">
                             {comment.user.name}
                           </span>
-                          <span className="text-gray-700">{comment.text}</span>
-                        </div>
-                        <div>
-                          <button
-                            onClick={() => handleDeleteComment(comment._id)}
-                            className="text-red-500 bg-gray-400 rounded-md h-8 text-xs mt-1"
-                          >
-                            Delete
-                          </button>
+                          <p className="text-gray-600">{comment.text}</p>
                         </div>
                       </div>
+
+                      {/* Delete Icon (Visible Only to Comment Owner) */}
+                      {comment.user._id === user._id && (
+                        <button
+                          onClick={() => handleDeleteComment(comment._id)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          <MdDelete size={18} />
+                        </button>
+                      )}
                     </div>
                   ))
               ) : (
-                <div>No comments yet.</div>
+                <div className="text-center text-gray-500">
+                  No comments yet.
+                </div>
               )}
             </div>
 
-            {/* Input Section for Adding Comment */}
-            <div className="absolute bottom-0 left-0 w-full p-3 bg-gray-300 rounded-md flex items-center space-x-3">
+            {/* Input Section */}
+            <div className="absolute bottom-0 left-0 w-full bg-gray-50 p-3  flex items-center space-x-2 border-t rounded-md">
+              {/* Emoji Picker */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  <FaSmile size={20} />
+                </button>
+                {showEmojiPicker && (
+                  <div className="absolute bottom-10 left-0 z-10 p-2 bg-white rounded-md shadow-md border max-w-xs max-h-64 overflow-auto">
+                    <EmojiPicker
+                      onEmojiClick={handleEmojiClick}
+                      searchDisabled
+                      emojiStyle="native"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Comment Input */}
               <input
                 type="text"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Add a comment..."
-                className="h-10 w-full px-4 border-2 border-gray-400 rounded-md focus:outline-none focus:border-blue-500"
+                className="flex-1 h-8 px-4 bg-gray-100 text-sm rounded-full border-none focus:ring-2 focus:ring-gray-300 focus:outline-none"
               />
+
+              {/* Post Button */}
               <button
                 onClick={handleAddComment}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm hover:bg-gray-400 transition-all"
               >
                 Post
               </button>
@@ -297,6 +352,8 @@ const UserPostCard = ({ post, onAddComment, onDeleteComment }) => {
           </div>
         </div>
       )}
+
+      
     </div>
   );
 };

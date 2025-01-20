@@ -3,6 +3,7 @@ import { postEndpoints } from "../apis";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { setSelectedPost, setPosts } from "../../slices/postSlice";
+import { Navigate } from "react-router-dom";
 
 const {
   NEW_POST_API,
@@ -15,44 +16,36 @@ const {
   DELETE_COMMENT_API,
 } = postEndpoints;
 
-export const createPost = (formData, navigate) => {
-  return async (dispatch, getState) => {
+
+export const createPost = (formData, posts) => {
+  return async (dispatch) => {
     const toastId = toast.loading("Creating post...");
-    dispatch(setLoadingSlice(true));
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    };
-
     try {
-      if (!formData || !formData.get("title") || !formData.get("description")) {
-        throw new Error("Title, description, and files are required.");
+      const response = await axios.post(NEW_POST_API, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      
+      // Handle the response here
+      if (response?.data?.success) {
+        dispatch(setPosts([response?.data?.post, ...posts])); // Update Redux state
+        toast.success(response?.data?.message || "Post created successfully!");
+        return { success: true };
+      } else {
+        toast.error(response?.data?.message || "Failed to create post.");
+        return { success: false, message: response?.data?.message };
       }
-
-      const response = await axios.post(NEW_POST_API, formData, config);
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Post creation failed");
-      }
-
-      toast.success(response.data.message || "Post created successfully!");
-      dispatch(setPosts(response.data.post));
-      dispatch(setPosts([response.data.post, ...posts])); // in dono me se koi ek dekhna hai
-      navigate("/");
     } catch (error) {
-      console.error("Error in createPost function:", error);
-      toast.error(
-        error.response?.data?.message || error.message || "Something went wrong"
-      );
+      toast.error(error?.message || "Something went wrong");
+      return { success: false, message: error?.message };
     } finally {
-      dispatch(setLoadingSlice(false));
       toast.dismiss(toastId);
     }
   };
 };
+
+
+
 
 export const fetchAllPosts = () => {
   return async (dispatch) => {
@@ -155,7 +148,7 @@ export const updatePost = (postId, formData) => {
   };
 };
 
-export const addComment = (postId, commentText,posts) => {
+export const addComment = (postId, commentText, posts) => {
   return async (dispatch) => {
     try {
       const response = await axios.post(
@@ -185,7 +178,7 @@ export const addComment = (postId, commentText,posts) => {
   };
 };
 
-export const deleteComment = (postId, commentId,posts) => {
+export const deleteComment = (postId, commentId, posts) => {
   return async (dispatch) => {
     try {
       const response = await axios.delete(
@@ -201,7 +194,9 @@ export const deleteComment = (postId, commentId,posts) => {
         if (post._id === postId) {
           return {
             ...post,
-            comments: post.comments.filter((comment) => comment._id !== commentId),
+            comments: post.comments.filter(
+              (comment) => comment._id !== commentId
+            ),
           };
         }
         return post;
@@ -233,18 +228,21 @@ export const likePost = (postId, isLiked, posts, userId) => {
         );
       }
 
-      const updatedpostdata = posts.map(p=>
-        p._id === postId ? {
-          ...p,
-          likes:isLiked ? p.likes.filter(id=> id !== userId) : [...p.likes,userId]
-        } : p
-      )
+      const updatedpostdata = posts.map((p) =>
+        p._id === postId
+          ? {
+              ...p,
+              likes: isLiked
+                ? p.likes.filter((id) => id !== userId)
+                : [...p.likes, userId],
+            }
+          : p
+      );
 
       // Dispatch the updated posts to the Redux store
       dispatch(setPosts(updatedpostdata));
       toast.success(response.data.message || "Reaction updated!");
       return updatedpostdata;
-
     } catch (error) {
       console.error("Error in likePost function:", error);
       toast.error(

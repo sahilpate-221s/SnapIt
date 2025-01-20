@@ -1,30 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { createPost } from "../../../services/operations/PostAPI";  // Assuming PostAPI is set up
+import { createPost } from "../../../services/operations/PostAPI"; // Assuming PostAPI is set up
+
+// Function to read file as Data URL for preview
+const readFileAsDataURL = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 const CreatePost = () => {
+  const imageRef = useRef();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [files, setFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
+  const [imagePreview, setImagePreview] = useState([]);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Direct useNavigate hook
+  
+  // Get posts from Redux store
+  const { posts } = useSelector((state) => state.posts);
 
   // Handle file input change
-  const handleFileChange = (e) => {
-    const selectedFiles = e.target.files;
-    if (selectedFiles) {
-      setFiles(selectedFiles);
-      const filePreviews = Array.from(selectedFiles).map((file) =>
-        URL.createObjectURL(file)  // Create a preview URL for each image
-      );
-      setPreviewUrls(filePreviews);
+  const handleFileChange = async (e) => {
+    const filesList = e.target.files;
+    setFiles(filesList);
+
+    const previewUrls = [];
+    for (let i = 0; i < filesList.length; i++) {
+      const file = filesList[i];
+      const dataUrl = await readFileAsDataURL(file);
+      previewUrls.push(dataUrl);
     }
+    setImagePreview(previewUrls);
   };
 
   // Handle form submission
@@ -46,18 +62,17 @@ const CreatePost = () => {
       formData.append("tag", tag);
 
       // Append files to the form data
-      Array.from(files).forEach((file) => {
-        formData.append("files", file);  // 'files' should match the field name expected by backend
-      });
+      Array.from(files).forEach((file) => formData.append("image", file));
 
-      // Call the createPost function and handle the response
-      const response = await dispatch(createPost(formData, navigate));
+      // Dispatch action to create the post and handle response
+      const response = await dispatch(createPost(formData, posts));
 
       // Handle response after post creation
-      if (response && response.success) {
+      if (response?.success) {
         toast.success("Post created successfully.");
+        navigate("/"); // Redirect after successful post creation
       } else {
-        toast.error("Error creating post.");
+        toast.error(response?.message || "Failed to create post.");
       }
     } catch (error) {
       console.error("Error creating post:", error);
@@ -96,10 +111,11 @@ const CreatePost = () => {
                   We recommend high-quality .jpg files, less than 10MB.
                 </p>
               </label>
-              {previewUrls.length > 0 && (
+              {imagePreview.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2 w-full">
-                  {previewUrls.map((url, index) => (
+                  {imagePreview.map((url, index) => (
                     <img
+                      ref={imageRef}
                       key={index}
                       src={url}
                       alt={`Preview ${index}`}

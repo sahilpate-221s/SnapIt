@@ -2,7 +2,6 @@ import { Post } from "../model/postModel.js";
 import { User } from "../model/userModel.js"; // Make sure this path is correct
 import cloudinary from "cloudinary";
 import DataUriParser from "datauri/parser.js";
-
 import dotenv from "dotenv";
 dotenv.config();
 
