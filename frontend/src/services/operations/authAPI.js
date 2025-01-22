@@ -1,6 +1,6 @@
 import axios from "axios"; // Import axios
 import { endpoints } from "../apis"; // Ensure your endpoints are correct
-import { setLoading, setToken, setSignupData } from "../../slices/authSlice";
+import { setLoading, setToken, setSignupData, clearToken } from "../../slices/authSlice";
 import { setUser } from "../../slices/profileSlice";
 import { toast } from "react-toastify";
 
@@ -105,11 +105,10 @@ export function logout(navigate) {
       toast.success("Logout Successful");
 
       // Clear Redux state and localStorage
-      dispatch(setToken(null));
-      dispatch(setUser(null));
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      dispatch(clearToken()); // Clear the token with the clearToken action
+      dispatch(setUser(null)); // Reset the user state
+      localStorage.removeItem("token"); // Remove token from localStorage
+      localStorage.removeItem("user"); // Remove user from localStorage
 
       navigate("/"); // Redirect to login page
     } catch (error) {
@@ -122,6 +121,7 @@ export function logout(navigate) {
     }
   };
 }
+
 
 
 export function changePassword(currentPassword, newPassword, navigate) {

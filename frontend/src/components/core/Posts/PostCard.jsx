@@ -51,6 +51,11 @@ const PostCard = ({ post, onLike, onAddComment, onDeleteComment }) => {
     }
   };
 
+  const handleEmojiClick = (emoji) => {
+    setNewComment((prev) => prev + emoji.emoji);
+    setShowEmojiPicker(false); // Close emoji picker after selection
+  };
+
   const handlePrevImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? post.images.length - 1 : prevIndex - 1

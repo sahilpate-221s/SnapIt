@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/common/Footer";
+import { motion } from "framer-motion";
 
 const Explore = () => {
-  const [showMore, setShowMore] = useState(false);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
-  
-  // Fetch posts from Redux state
+  const navigate = useNavigate();
+
   const posts = useSelector((state) => state.posts.posts);
 
-  // Shuffle function to randomize the array of posts
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -19,16 +19,33 @@ const Explore = () => {
     return shuffled;
   };
 
-  // Get shuffled posts (images will be part of each post)
   const shuffledPosts = shuffleArray(posts);
 
-  // Handle responsiveness
+  const groupByTags = (posts) => {
+    const tagMap = {};
+    posts.forEach((post) => {
+      post.tags.forEach((tag) => {
+        if (!tagMap[tag]) {
+          tagMap[tag] = [];
+        }
+        tagMap[tag].push(post);
+      });
+    });
+    return tagMap;
+  };
+
+  const [groupedTags, setGroupedTags] = useState(groupByTags(posts));
+
+  useEffect(() => {
+    setGroupedTags(groupByTags(posts));
+  }, [posts]);
+
   useEffect(() => {
     const handleResize = () => {
-      setIsSmallDevice(window.innerWidth <= 768); // Small devices (tablet or smaller)
+      setIsSmallDevice(window.innerWidth <= 768);
     };
 
-    handleResize(); // Check initial window size
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -37,121 +54,134 @@ const Explore = () => {
   }, []);
 
   return (
-    <div className="min-h-screen p-8 w-full max-w-11/12 mx-auto">
+    <div className="min-h-screen  to-white p-8 w-11/12 mx-auto">
       {/* Main Heading */}
-      <h1 className="text-5xl md:text-8xl font-caveat text-center mb-4 md:mb-12">
-        Explore
-      </h1>
-      <span className="sm:text-sm text-xl lg:text-2xl text-gray-500 font-diphylleia lg:ml-12 lg:mb-12 mt-4">
-        Explore the best from the university
-      </span>
-      <div className="container mx-auto md:mt-5 lg:mt-0 ">
-        {/* Split Layout */}
-        <div className="flex flex-col md:flex-row gap-4 lg:m-6 md:mb-12">
-          {/* Left Side (2x2 Grid) */}
-          <div className="w-full md:w-1/2 grid grid-cols-2 gap-4 cursor-pointer">
-            {shuffledPosts.slice(0, 4).map((post, index) => (
-              <div
-                key={index}
-                className="h-48 rounded-lg overflow-hidden shadow-md relative hover:scale-105 transition-transform duration-300"
-              >
-                <img
-                  src={post.images[0]?.url || "/placeholder.png"} // Fallback to placeholder if no image
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 w-full flex items-center justify-center bg-black bg-opacity-50 text-white py-2 backdrop-blur-sm">
-                  {post.title}
-                </div>
-              </div>
-            ))}
-          </div>
+      <motion.h1
+        className="text-5xl md:text-7xl font-diphylleia text-center text-gray-800 mb-8"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        Explore The Best Content
+      </motion.h1>
 
-          {/* Right Side (Single Div with Height Equal to Left Side) */}
-          <div className="w-full md:w-1/2 h-[25rem] rounded-2xl overflow-hidden shadow-lg relative hover:scale-105 transition-transform duration-300 cursor-pointer">
-            <img
-              src={shuffledPosts[4]?.images[0]?.url || "/placeholder.png"}
-              alt="Div 5"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-0 w-full flex items-center justify-center bg-black bg-opacity-50 text-white py-4 backdrop-blur-sm">
-              {shuffledPosts[4]?.title}
-            </div>
+      {/* Featured Posts Grid */}
+      <section className="container mx-auto mb-16">
+  <h2 className="text-3xl font-caveat text-center text-gray-800 mb-8">
+    Featured Posts
+  </h2>
+  <motion.div
+    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    initial="hidden"
+    animate="visible"
+    variants={{
+      hidden: { opacity: 0, y: 30 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+          delayChildren: 0.2,
+          staggerChildren: 0.2,
+        },
+      },
+    }}
+  >
+    {shuffledPosts.slice(0, 6).map((post, index) => (
+      <motion.div
+        key={index}
+        className="relative group rounded-lg overflow-hidden shadow-lg cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+        variants={{
+          hidden: { opacity: 0, y: 30 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        onClick={() => navigate(`/tags/${post.tags[0]}`)}
+      >
+        <img
+          src={post.images[0]?.url || "/placeholder.png"}
+          alt={post.title}
+          className="w-full h-60 object-cover rounded-lg group-hover:scale-105 transition-all duration-300 group-hover:opacity-90"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300"></div>
+        <div className="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <h4 className="text-xl font-semibold">{post.title}</h4>
+        </div>
+        <div className="absolute top-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="text-sm font-light">#{post.tags[0]}</span>
+        </div>
+      </motion.div>
+    ))}
+  </motion.div>
+</section>
+
+
+      {/* Trending Tags Section */}
+      <section className="container mx-auto mb-16">
+  <h3 className="text-3xl font-semibold text-center text-gray-800 mb-8">
+    Trending Tags
+  </h3>
+  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+    {shuffleArray(Object.keys(groupedTags))
+      .slice(0, 8)
+      .map((tag, index) => (
+        <div
+          key={index}
+          className="relative overflow-hidden rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group"
+          onClick={() => navigate(`/tags/${tag}`)}
+        >
+          <img
+            src={groupedTags[tag][0]?.images[0]?.url || "/placeholder.png"}
+            alt={tag}
+            className="w-full h-40 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
+          <div className="absolute bottom-4 left-4 text-white">
+            <h4 className="text-lg font-bold">{tag}</h4>
+            <p className="text-sm opacity-75">{groupedTags[tag].length} posts</p>
           </div>
         </div>
+      ))}
+  </div>
+</section>
 
-        {/* Hidden Reversed Split Layout */}
-        {!isSmallDevice && showMore && (
-          <div className="flex flex-col md:flex-row gap-4 lg:m-6 lg:mt-20">
-            {/* Left Side (Single Div with Height Equal to Right Side) */}
-            <div className="w-full md:w-1/2 h-[25rem] rounded-2xl overflow-hidden shadow-lg relative hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <img
-                src={shuffledPosts[5]?.images[0]?.url || "/placeholder.png"}
-                alt="Div 5 (Reversed)"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 w-full flex items-center justify-center bg-black bg-opacity-50 text-white py-4 backdrop-blur-sm">
-                {shuffledPosts[5]?.title}
-              </div>
-            </div>
 
-            {/* Right Side (2x2 Grid) */}
-            <div className="w-full md:w-1/2 grid grid-cols-2 gap-4 cursor-pointer">
-              {shuffledPosts.slice(6, 10).map((post, index) => (
-                <div
-                  key={index}
-                  className="h-48 rounded-lg overflow-hidden shadow-md relative hover:scale-105 transition-transform duration-300"
-                >
-                  <img
-                    src={post.images[0]?.url || "/placeholder.png"}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 w-full flex items-center justify-center bg-black bg-opacity-50 text-white py-2 backdrop-blur-sm">
-                    {post.title}
-                  </div>
-                </div>
-              ))}
-            </div>
+
+
+      {/* Browse By Tags Section */}
+      <section className="container mx-auto mb-16">
+  <h3 className="text-3xl font-semibold text-center text-gray-800 mb-8">
+    Browse by Tags
+  </h3>
+  <div className="flex flex-wrap justify-center gap-6">
+    {shuffleArray(Object.keys(groupedTags))
+      .slice(0, 10)
+      .map((tag, index) => (
+        <div
+          key={index}
+          className="relative group w-32 h-32 rounded-full overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300"
+          onClick={() => navigate(`/tags/${tag}`)}
+        >
+          <img
+            src={groupedTags[tag][0]?.images[0]?.url || "/placeholder.png"}
+            alt={tag}
+            className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-lg font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {tag}
           </div>
-        )}
-
-        {/* Show More Button */}
-        {!isSmallDevice && (
-          <div className="flex items-center justify-center mt-6 md:mt-8">
-            <button
-              onClick={() => setShowMore(!showMore)}
-              className="bg-gray-300 border h-16 rounded-2xl w-[10rem] hover:bg-gray-400 transition-colors"
-            >
-              {showMore ? "Show Less" : "Show More"}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Browse By Tags */}
-      <div className="lg:m-6 mt-12 md:mt-16">
-        <span className="text-2xl text-gray-500 font-diphylleia">
-          Browse By Tags
-        </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 lg:mb-4">
-          {shuffledPosts.slice(0, 8).map((post, index) => (
-            <div
-              key={index}
-              className="h-[16rem] w-full rounded-xl overflow-hidden shadow-md relative flex flex-col justify-end cursor-pointer hover:scale-105 transition-transform duration-300"
-            >
-              <img
-                src={post.images[0]?.url || "/placeholder.png"}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="w-full bg-black bg-opacity-50 text-white text-center py-2 backdrop-blur-sm">
-                {post.title}
-              </div>
-            </div>
-          ))}
         </div>
-      </div>
+      ))}
+  </div>
+</section>
+
+
+      {/* Floating Action Button (FAB) */}
+      <motion.div
+        className="fixed bottom-8 right-8 bg-blue-600 p-4 rounded-full shadow-xl text-white cursor-pointer transition-transform duration-300 hover:scale-110"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        whileHover={{ scale: 1.2 }}
+      >
+        <i className="fas fa-arrow-up"></i>
+      </motion.div>
 
       <Footer />
     </div>

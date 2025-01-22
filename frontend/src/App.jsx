@@ -13,6 +13,7 @@ import CreatePost from "./components/core/Posts/CreatePost";
 import Error from "./pages/Error";
 import LoggedHomePage from "./components/core/Posts/LoggedHomePage";
 import Dashboard from "./components/core/Dashboard/Dashboard";
+import TagPage from "./pages/TagPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -28,6 +29,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
         <Route path="/explore" element={<Explore />} />
+        <Route path="/tags/:tag" element={
+          <PrivateRoute>
+            <TagPage />
+          </PrivateRoute>
+        } />
 
         <Route
           path="/create"

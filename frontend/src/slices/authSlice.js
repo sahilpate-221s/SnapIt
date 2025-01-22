@@ -1,13 +1,13 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   signupData: null,
   loading: false,
-  token: localStorage.getItem("token") ? JSON.parse(localStorage.getItem("token")) : null,
+  token: null,
 };
 
 const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
     setSignupData(state, action) {
@@ -17,8 +17,19 @@ const authSlice = createSlice({
       state.loading = action.payload;
     },
     setToken(state, action) {
-      console.log("Setting token:", action.payload); // Debugging
-      state.token = action.payload; // Optionally store token if needed (but not in localStorage)
+      const tokenData = action.payload;
+      const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000; // Token expires after 1 day
+    
+      const currentTime = new Date().getTime();
+      if (currentTime < expiryTime) {
+        state.token = { token: tokenData, expiry: expiryTime };
+      } else {
+        state.token = null; // Clear token if expired
+      }
+    },
+    
+    clearToken(state) {
+      state.token = null; // Explicitly clear the token
     },
   },
 });

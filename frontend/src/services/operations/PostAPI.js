@@ -17,32 +17,49 @@ const {
 } = postEndpoints;
 
 
-export const createPost = (formData, posts) => {
-  return async (dispatch) => {
+export const createPost = (formData) => {
+  return async (dispatch, getState) => {
     const toastId = toast.loading("Creating post...");
     try {
+      // Make the API request
       const response = await axios.post(NEW_POST_API, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         withCredentials: true,
       });
-      
-      // Handle the response here
-      if (response?.data?.success) {
-        dispatch(setPosts([response?.data?.post, ...posts])); // Update Redux state
-        toast.success(response?.data?.message || "Post created successfully!");
+
+      // Destructure the response for clarity
+      const { success, post, message } = response?.data;
+
+      if (success) {
+        // Get the current posts from state
+        const { posts } = getState().posts;
+
+        // Update Redux state with the new post
+        dispatch(setPosts([post, ...posts]));
+
+        // Success notification
+        toast.success(message || "Post created successfully!");
         return { success: true };
       } else {
-        toast.error(response?.data?.message || "Failed to create post.");
-        return { success: false, message: response?.data?.message };
+        // Error notification for API failure
+        toast.error(message || "Failed to create post.");
+        return { success: false, message };
       }
     } catch (error) {
-      toast.error(error?.message || "Something went wrong");
-      return { success: false, message: error?.message };
+      // Detailed error handling
+      const errorMessage =
+        error.response?.data?.message || error.message || "Something went wrong";
+      toast.error(errorMessage);
+      return { success: false, message: errorMessage };
     } finally {
+      // Dismiss loading toast
       toast.dismiss(toastId);
     }
   };
 };
+
 
 
 

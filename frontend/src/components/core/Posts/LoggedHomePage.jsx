@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import {
   fetchAllPosts,
   likePost,
@@ -13,13 +14,27 @@ import { Loading } from "../../common/Loading"; // Loading component
 import Masonry from "react-masonry-css"; // Masonry layout for grid
 import PostCard from "./PostCard"; // PostCard component for detailed view
 import { setSelectedPost } from "../../../slices/postSlice"; // Action to set selected post in Redux
+import { clearToken } from "../../../slices/authSlice"; // Import the action to clear the token
 
 const LoggedHomePage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Initialize the navigation hook
   const user = useSelector((state) => state.profile.user);
   const posts = useSelector((state) => state.posts.posts || []); // Default to empty array
   const selectedPost = useSelector((state) => state.posts.selectedPost); // Access selected post from Redux
   const [loading, setLoading] = useState(false); // Loading state
+
+  // Get token from state
+  const token = useSelector((state) => state.auth.token);
+
+  useEffect(() => {
+    // Check if the token is expired
+    if (token && token.expiry < new Date().getTime()) {
+      dispatch(clearToken()); // Clear expired token from Redux
+      toast.error("Session expired. Please log in again.");
+      navigate("/login"); // Redirect to the login page
+    }
+  }, [dispatch, token, navigate]);
 
   // Load posts when the component mounts
   useEffect(() => {
@@ -51,7 +66,6 @@ const LoggedHomePage = () => {
   // Handle like action
   const handleLike = async (postId, isLiked) => {
     try {
-      console.log("calling the likePost and the userId checking",user._id);
       const updatedPost = await dispatch(likePost(postId, isLiked, posts, user._id));
       if (updatedPost) {
         console.log("Liked the post successfully:", updatedPost);
@@ -60,16 +74,15 @@ const LoggedHomePage = () => {
       console.error("Error in handleLike:", error);
     }
   };
-  
 
   // Handle adding a comment to a post
   const handleAddComment = (postId, commentText) => {
-    dispatch(addComment(postId, commentText,posts)); // Dispatch addComment action
+    dispatch(addComment(postId, commentText, posts)); // Dispatch addComment action
   };
 
   // Handle deleting a comment
   const handleDeleteComment = (postId, commentId) => {
-    dispatch(deleteComment(postId, commentId,posts)); // Dispatch deleteComment action
+    dispatch(deleteComment(postId, commentId, posts)); // Dispatch deleteComment action
   };
 
   // Handle deleting a post
@@ -80,7 +93,7 @@ const LoggedHomePage = () => {
   return (
     <div className="min-h-screen w-11/12 mx-auto p-6">
       {/* Content Section */}
-      <div className="container min-h-screen w-full mx-auto ">
+      <div className="container min-h-screen w-full mx-auto">
         {loading ? (
           <Loading /> // Display Loading component while data is loading
         ) : posts.length > 0 ? (

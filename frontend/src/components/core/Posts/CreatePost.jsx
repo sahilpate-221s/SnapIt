@@ -1,11 +1,179 @@
+// import React, { useState, useRef } from "react";
+// import { FaPlus } from "react-icons/fa";
+// import { useDispatch, useSelector } from "react-redux";
+// import { toast } from "react-toastify";
+// import { useNavigate } from "react-router-dom";
+// import { createPost } from "../../../services/operations/PostAPI";
+
+// const readFileAsDataURL = (file) => {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
+//     reader.onloadend = () => resolve(reader.result);
+//     reader.onerror = reject;
+//     reader.readAsDataURL(file);
+//   });
+// };
+
+// const CreatePost = () => {
+//   const imageRef = useRef();
+//   const [title, setTitle] = useState("");
+//   const [description, setDescription] = useState("");
+//   const [tag, setTag] = useState("");
+//   const [files, setFiles] = useState([]);
+//   const [imagePreview, setImagePreview] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+
+//   const { posts } = useSelector((state) => state.posts);
+
+//   const handleFileChange = async (e) => {
+//     const filesList = e.target.files;
+//     setFiles(filesList);
+
+//     const previewUrls = [];
+//     for (let i = 0; i < filesList.length; i++) {
+//       const file = filesList[i];
+//       const dataUrl = await readFileAsDataURL(file);
+//       previewUrls.push(dataUrl);
+//     }
+//     setImagePreview(previewUrls);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!title || !description || !tag || files.length === 0) {
+//       toast.error("Please fill all fields and select images.");
+//       return;
+//     }
+
+//     setLoading(true);
+//     try {
+//       const formData = new FormData();
+//       formData.append("title", title);
+//       formData.append("description", description);
+//       formData.append("tag", tag);
+
+//       Array.from(files).forEach((file) => formData.append("images", file));
+
+//       const response = await dispatch(createPost(formData, posts));
+
+//       if (response?.success) {
+//         navigate("/");
+//       } else {
+//         toast.error(response?.message || "Failed to create post.");
+//       }
+//     } catch (error) {
+//       console.error("Error creating post:", error);
+//       toast.error("Error creating post.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="w-11/12 mx-auto flex min-h-screen items-center justify-center my-auto">
+//       <div className="container w-11/12 bg-white border p-6 rounded-xl shadow-lg">
+//         <h1 className="text-3xl font-diphylleia text-gray-800 text-center mb-6">
+//           Create a Post
+//         </h1>
+//         <form
+//           onSubmit={handleSubmit}
+//           className="flex flex-col md:flex-row gap-8"
+//         >
+//           {/* Image Upload Section */}
+//           <div className="flex items-center justify-center w-full md:w-1/2">
+//             <div className="flex flex-col items-center justify-center w-full p-6 bg-gray-50 rounded-lg shadow-lg">
+//               <input
+//                 type="file"
+//                 accept="image/*"
+//                 multiple
+//                 onChange={handleFileChange}
+//                 className="hidden"
+//                 id="file-upload"
+//               />
+//               <label
+//                 htmlFor="file-upload"
+//                 className="flex flex-col items-center justify-center h-full cursor-pointer"
+//               >
+//                 <div className="w-12 h-12 mb-4 flex items-center justify-center bg-blue-100 text-blue-500 rounded-full shadow-sm">
+//                   <FaPlus size={20} />
+//                 </div>
+//                 <p className="text-gray-600 font-medium">Choose files</p>
+//                 <p className="mt-2 text-sm text-gray-400 text-center">
+//                   We recommend high-quality .jpg files, less than 10MB.
+//                 </p>
+//               </label>
+//               {imagePreview.length > 0 && (
+//                 <div className="mt-4 grid grid-cols-3 gap-2 w-full">
+//                   {imagePreview.map((url, index) => (
+//                     <img
+//                       ref={imageRef}
+//                       key={index}
+//                       src={url}
+//                       alt={`Preview ${index}`}
+//                       className="w-full h-20 object-cover rounded-md"
+//                     />
+//                   ))}
+//                 </div>
+//               )}
+//             </div>
+//           </div>
+
+//           {/* Form Fields Section */}
+//           <div className="flex flex-col w-full md:w-1/2 space-y-4 lg:mx-3">
+//             <input
+//               type="text"
+//               placeholder="Title"
+//               value={title}
+//               onChange={(e) => setTitle(e.target.value)}
+//               className="p-2 border border-gray-300 rounded-md"
+//               required
+//             />
+//             <textarea
+//               placeholder="Description"
+//               value={description}
+//               onChange={(e) => setDescription(e.target.value)}
+//               className="p-2 border border-gray-300 rounded-md"
+//               rows="3"
+//               required
+//             />
+//             <input
+//               type="text"
+//               placeholder="Tag"
+//               value={tag}
+//               onChange={(e) => setTag(e.target.value)}
+//               className="p-3 border border-gray-300 rounded-md"
+//               required
+//             />
+//             <button
+//               type="submit"
+//               className={`p-3 text-white rounded-md ${
+//                 loading
+//                   ? "bg-gray-400 cursor-not-allowed"
+//                   : "bg-blue-500 hover:bg-blue-600"
+//               }`}
+//               disabled={loading}
+//             >
+//               {loading ? "Uploading..." : "Create Post"}
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default CreatePost;
+
 import React, { useState, useRef } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { createPost } from "../../../services/operations/PostAPI"; // Assuming PostAPI is set up
+import { createPost } from "../../../services/operations/PostAPI";
 
-// Function to read file as Data URL for preview
 const readFileAsDataURL = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -16,7 +184,6 @@ const readFileAsDataURL = (file) => {
 };
 
 const CreatePost = () => {
-  const imageRef = useRef();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
@@ -24,30 +191,35 @@ const CreatePost = () => {
   const [imagePreview, setImagePreview] = useState([]);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Direct useNavigate hook
-  
-  // Get posts from Redux store
+  const navigate = useNavigate();
+
   const { posts } = useSelector((state) => state.posts);
 
-  // Handle file input change
   const handleFileChange = async (e) => {
     const filesList = e.target.files;
-    setFiles(filesList);
+    const newFiles = Array.from(filesList);
+    const newPreviews = [];
 
-    const previewUrls = [];
-    for (let i = 0; i < filesList.length; i++) {
-      const file = filesList[i];
+    for (const file of newFiles) {
       const dataUrl = await readFileAsDataURL(file);
-      previewUrls.push(dataUrl);
+      newPreviews.push(dataUrl);
     }
-    setImagePreview(previewUrls);
+
+    setFiles([...files, ...newFiles]);
+    setImagePreview([...imagePreview, ...newPreviews]);
   };
 
-  // Handle form submission
+  const handleRemoveImage = (index) => {
+    const updatedFiles = files.filter((_, i) => i !== index);
+    const updatedPreviews = imagePreview.filter((_, i) => i !== index);
+
+    setFiles(updatedFiles);
+    setImagePreview(updatedPreviews);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate the form data
     if (!title || !description || !tag || files.length === 0) {
       toast.error("Please fill all fields and select images.");
       return;
@@ -55,22 +227,17 @@ const CreatePost = () => {
 
     setLoading(true);
     try {
-      // Create form data for file upload
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
       formData.append("tag", tag);
 
-      // Append files to the form data
-      Array.from(files).forEach((file) => formData.append("image", file));
+      files.forEach((file) => formData.append("images", file));
 
-      // Dispatch action to create the post and handle response
       const response = await dispatch(createPost(formData, posts));
 
-      // Handle response after post creation
       if (response?.success) {
-        toast.success("Post created successfully.");
-        navigate("/"); // Redirect after successful post creation
+        navigate("/");
       } else {
         toast.error(response?.message || "Failed to create post.");
       }
@@ -83,64 +250,73 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="container w-11/12 max-w-4xl bg-white p-8 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="container w-full max-w-4xl bg-white border p-8 rounded-xl shadow-lg">
+        <h1 className="text-3xl font-diphylleia text-gray-800 text-center mb-8">
           Create a Post
         </h1>
-        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-8">
-          <div className="flex items-center justify-center w-full md:w-1/2">
-            <div className="flex flex-col items-center justify-center w-full p-6 bg-gray-50 rounded-lg shadow-md">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
-              />
-              <label
-                htmlFor="file-upload"
-                className="flex flex-col items-center justify-center h-full cursor-pointer"
-              >
-                <div className="w-12 h-12 mb-4 flex items-center justify-center bg-blue-100 text-blue-500 rounded-full shadow-sm">
-                  <FaPlus size={20} />
-                </div>
-                <p className="text-gray-600 font-medium">Choose files</p>
-                <p className="mt-2 text-sm text-gray-400 text-center">
-                  We recommend high-quality .jpg files, less than 10MB.
-                </p>
-              </label>
-              {imagePreview.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-2 w-full">
-                  {imagePreview.map((url, index) => (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col md:flex-row gap-8"
+        >
+          {/* Image Upload Section */}
+          <div className="flex flex-col items-center w-full md:w-1/2 p-6 bg-gray-50 rounded-lg shadow-md">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+              id="file-upload"
+            />
+            <label
+              htmlFor="file-upload"
+              className="flex flex-col items-center justify-center w-full h-48 bg-gray-200 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-300"
+            >
+              <FaPlus size={24} className="text-gray-500 mb-2" />
+              <p className="text-gray-600 font-diphylleia">Click to upload</p>
+              <p className="mt-1 text-sm text-gray-400">
+                High-quality .jpg files, less than 10MB.
+              </p>
+            </label>
+            {imagePreview.length > 0 && (
+              <div className="mt-6 grid grid-cols-3 gap-4 w-full">
+                {imagePreview.map((url, index) => (
+                  <div key={index} className="relative group">
                     <img
-                      ref={imageRef}
-                      key={index}
                       src={url}
                       alt={`Preview ${index}`}
-                      className="w-full h-20 object-cover rounded-md"
+                      className="w-full h-32 object-cover rounded-md"
                     />
-                  ))}
-                </div>
-              )}
-            </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600"
+                    >
+                      <FaTrash size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex flex-col w-full md:w-1/2 space-y-4">
+
+          {/* Form Fields Section */}
+          <div className="flex flex-col w-full md:w-1/2 space-y-6">
             <input
               type="text"
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none font-caveat focus:ring-2 focus:ring-blue-500"
               required
             />
             <textarea
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md"
-              rows="5"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none font-caveat focus:ring-2 focus:ring-blue-500"
+              rows="4"
               required
             />
             <input
@@ -148,12 +324,16 @@ const CreatePost = () => {
               placeholder="Tag"
               value={tag}
               onChange={(e) => setTag(e.target.value)}
-              className="p-3 border border-gray-300 rounded-md"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none font-caveat focus:ring-2 focus:ring-blue-500"
               required
             />
             <button
               type="submit"
-              className={`p-3 text-white rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
+              className={`p-3 text-white rounded-md ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-gray-400 via-gray-600 to-gray-700 hover:from-gray-700 hover:via-gray-500 hover:to-gray-600"
+              }`}
               disabled={loading}
             >
               {loading ? "Uploading..." : "Create Post"}
