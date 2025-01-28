@@ -15,6 +15,7 @@ import Masonry from "react-masonry-css"; // Masonry layout for grid
 import PostCard from "./PostCard"; // PostCard component for detailed view
 import { setSelectedPost } from "../../../slices/postSlice"; // Action to set selected post in Redux
 import { clearToken } from "../../../slices/authSlice"; // Import the action to clear the token
+import { motion } from "framer-motion"; // Import motion for animations
 
 const LoggedHomePage = () => {
   const dispatch = useDispatch();
@@ -66,7 +67,9 @@ const LoggedHomePage = () => {
   // Handle like action
   const handleLike = async (postId, isLiked) => {
     try {
-      const updatedPost = await dispatch(likePost(postId, isLiked, posts, user._id));
+      const updatedPost = await dispatch(
+        likePost(postId, isLiked, posts, user._id)
+      );
       if (updatedPost) {
         console.log("Liked the post successfully:", updatedPost);
       }
@@ -107,21 +110,25 @@ const LoggedHomePage = () => {
                 key={post._id}
                 className="bg-white shadow-lg rounded-lg mb-6"
               >
-                {/* Image Section */}
+                {/* Image Section with tilt effect on hover */}
                 {post.images && post.images.length > 0 && (
-                  <div className="relative">
+                  <motion.div
+                    className="relative"
+                    whileHover={{ scale: 1.02, rotate: 2 }} // Reduced tilt effect (smaller scale and rotation)
+                    transition={{ type: "spring", stiffness: 200 }}
+                    onClick={() => handleImageClick(post)} // Open modal on image click
+                  >
                     <img
                       src={post.images[0].url}
                       alt={post.title}
                       className="w-full object-cover rounded-lg cursor-pointer"
-                      onClick={() => handleImageClick(post)} // Open modal on image click
                     />
                     {post.images.length > 1 && (
                       <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
                         {post.images.length} images
                       </span>
                     )}
-                  </div>
+                  </motion.div>
                 )}
               </div>
             ))}

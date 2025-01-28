@@ -8,7 +8,6 @@ import ProfileDropdown from "../core/Auth/ProfileDropdown"; // Import the Profil
 
 const Navbar = () => {
   const { token } = useSelector((state) => state.auth); // Get token from Redux state
-  // console.log("token from the auth state", token);
   const { user } = useSelector((state) => state.profile); // Get user info from Redux state
   const location = useLocation(); // Get the current route
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Manage menu toggle for mobile
@@ -25,8 +24,11 @@ const Navbar = () => {
       <div className="container mx-auto flex justify-between items-center w-11/12 max-w-maxContent">
         {/* Left Section: Logo and Search or Navigation Links */}
         <div className="flex items-center space-x-4">
-          <img src={logo} alt="Logo" className="h-12" />{" "}
-          {/* Adjusted logo size for taller navbar */}
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-12 rounded-full md:h-14" // Adjusted size for the circle on tablets
+          />
           {token ? (
             <div className="relative items-center hidden md:flex">
               <input
@@ -39,47 +41,45 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden md:flex items-center space-x-2"> {/* Reduced gap for tablets */}
               {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`${
-                  location.pathname === item.path
-                    ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
-                    : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
-                } flex items-center justify-center px-4 py-3 rounded-lg`} // Adjusted px value for a more balanced look
-              >
-                <p className="font-semibold">{item.name}</p>
-              </Link>
-            ))}
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`${
+                    location.pathname === item.path
+                      ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
+                      : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
+                  } flex items-center justify-center px-4 py-3 rounded-lg focus:outline-none focus:ring-0`}
+                >
+                  <p className="font-semibold">{item.name}</p>
+                </Link>
+              ))}
             </div>
           )}
         </div>
 
         {/* Right Section: Navigation Links or ProfileDropdown */}
-        <div className="flex items-center space-x-4 md:space-x-3">
+        <div className="flex items-center space-x-4 md:space-x-2"> {/* Reduced gap for tablets */}
           {token ? (
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`${
-                  location.pathname === item.path
-                    ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
-                    : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
-                } flex items-center justify-center px-4 py-3 rounded-lg`} // Adjusted px value for a more balanced look
-              >
-                <p className="font-semibold">{item.name}</p>
-              </Link>
-            ))}
-            <ProfileDropdown />
-          </div>
-          
-          
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`${
+                    location.pathname === item.path
+                      ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
+                      : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
+                  } flex items-center justify-center md:px-1 lg:px-3 py-3 rounded-lg focus:outline-none focus:ring-0`}
+                >
+                  <p className="font-semibold">{item.name}</p>
+                </Link>
+              ))}
+              <ProfileDropdown />
+            </div>
           ) : (
-            <div className="hidden md:flex space-x-1">
+            <div className="hidden md:flex space-x-2"> {/* Reduced gap for tablets */}
               <Link
                 to="/register"
                 className="text-gray-600 hover:text-black hover:bg-gray-200 px-3 py-1 rounded-md"
@@ -112,13 +112,25 @@ const Navbar = () => {
         } transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-300">
-          <img src={logo} alt="Logo" className="h-8" />
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-8 rounded-full" // Adjusted size for mobile logo
+          />
           <button className="text-black" onClick={() => setIsMenuOpen(false)}>
             <AiOutlineClose size={24} />
           </button>
         </div>
 
         <div className="flex flex-col mt-4 space-y-2 px-4">
+          {token && (
+            <div className="flex flex-col space-y-2">
+              {/* Profile Dropdown first */}
+              <ProfileDropdown />
+            </div>
+          )}
+
+          {/* Other navigation links */}
           {navItems.map((item) => (
             <Link
               key={item.name}
@@ -127,7 +139,7 @@ const Navbar = () => {
                 location.pathname === item.path
                   ? "bg-gray-400 text-black rounded-xl"
                   : "text-gray-600 hover:text-black hover:rounded-xl"
-              } px-3 py-2`}
+              } px-3 py-2 focus:outline-none focus:ring-0`} // Added focus:outline-none to remove focus border
               onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
@@ -136,9 +148,7 @@ const Navbar = () => {
         </div>
 
         <div className="flex flex-col mt-4 space-y-2 px-4 border-t border-gray-300 pt-4">
-          {token ? (
-            <ProfileDropdown />
-          ) : (
+          {token ? null : (
             <>
               <Link
                 to="/register"

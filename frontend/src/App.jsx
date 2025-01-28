@@ -14,6 +14,9 @@ import Error from "./pages/Error";
 import LoggedHomePage from "./components/core/Posts/LoggedHomePage";
 import Dashboard from "./components/core/Dashboard/Dashboard";
 import TagPage from "./pages/TagPage";
+import Collections from "./pages/collectionSample";
+import ProfileUpdate from "./pages/ProfileUpdate";
+
 
 function App() {
   const dispatch = useDispatch();
@@ -53,6 +56,10 @@ function App() {
           }
         />
         <Route path="/error" element={<Error />} />
+        <Route path="/collections" element={<Collections />} />
+        <Route path="/edit-profile" element={<ProfileUpdate />} />
+        
+
       </Routes>
     </div>
   );
