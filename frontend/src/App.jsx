@@ -14,10 +14,10 @@ import Error from "./pages/Error";
 import LoggedHomePage from "./components/core/Posts/LoggedHomePage";
 import Dashboard from "./components/core/Dashboard/Dashboard";
 import TagPage from "./pages/TagPage";
-import Collections from "./pages/collectionSample";
+// import Collections from "./pages/collectionSample";
 import ProfileUpdate from "./pages/ProfileUpdate";
-
-
+import AddPosts from "./components/collections/AddPosts";
+import ShowAllCollections from "./components/collections/ShowAllCollections";
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,11 +32,14 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
         <Route path="/explore" element={<Explore />} />
-        <Route path="/tags/:tag" element={
-          <PrivateRoute>
-            <TagPage />
-          </PrivateRoute>
-        } />
+        <Route
+          path="/tags/:tag"
+          element={
+            <PrivateRoute>
+              <TagPage />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/create"
@@ -56,10 +59,11 @@ function App() {
           }
         />
         <Route path="/error" element={<Error />} />
-        <Route path="/collections" element={<Collections />} />
+        {/* <Route path="/collections" element={<Collections />} /> */}
         <Route path="/edit-profile" element={<ProfileUpdate />} />
-        
 
+        <Route path="/collection/:collectionId/posts" element={<AddPosts />} />
+        <Route path="/collection/all-Collections" element={<ShowAllCollections/>} />
       </Routes>
     </div>
   );

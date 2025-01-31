@@ -105,11 +105,11 @@ function ProfileDropdown() {
 
       {/* Modal for Create Collection */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center  z-50 backdrop-blur-sm">
           {/* Modal Container */}
           <div
             ref={modalRef}
-            className="w-full max-w-md p-4 bg-white rounded-lg shadow-lg transform transition-all scale-100"
+            className="w-full max-w-md p-4 bg-traparent mx-auto rounded-lg shadow-lg transform transition-all scale-100"
           >
             <CreateCollection onClose={() => setIsModalOpen(false)} />
           </div>

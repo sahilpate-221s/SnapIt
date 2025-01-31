@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
+import { useNavigate } from "react-router-dom";
 import {
   fetchAllPosts,
   likePost,
@@ -10,113 +10,109 @@ import {
   deletePost,
   fetchSinglePost,
 } from "../../../services/operations/PostAPI";
-import { Loading } from "../../common/Loading"; // Loading component
-import Masonry from "react-masonry-css"; // Masonry layout for grid
-import PostCard from "./PostCard"; // PostCard component for detailed view
-import { setSelectedPost } from "../../../slices/postSlice"; // Action to set selected post in Redux
-import { clearToken } from "../../../slices/authSlice"; // Import the action to clear the token
-import { motion } from "framer-motion"; // Import motion for animations
+import { Loading } from "../../common/Loading";
+import Masonry from "react-masonry-css";
+import PostCard from "./PostCard";
+import { setSelectedPost } from "../../../slices/postSlice";
+import { clearToken } from "../../../slices/authSlice";
+import { motion } from "framer-motion";
 
 const LoggedHomePage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Initialize the navigation hook
-  const user = useSelector((state) => state.profile.user);
-  const posts = useSelector((state) => state.posts.posts || []); // Default to empty array
-  const selectedPost = useSelector((state) => state.posts.selectedPost); // Access selected post from Redux
-  const [loading, setLoading] = useState(false); // Loading state
+  const navigate = useNavigate();
 
-  // Get token from state
+  // Memoize Redux state selectors to prevent unnecessary re-renders
+  const user = useSelector((state) => state.profile.user, shallowEqual);
+  const posts = useSelector((state) => state.posts.posts || [], shallowEqual);
+  const selectedPost = useSelector((state) => state.posts.selectedPost, shallowEqual);
   const token = useSelector((state) => state.auth.token);
 
+  const [loading, setLoading] = useState(false);
+
+  // Memoized token expiry check
+  const isTokenExpired = useMemo(() => {
+    return token && token.expiry < Date.now();
+  }, [token]);
+
   useEffect(() => {
-    // Check if the token is expired
-    if (token && token.expiry < new Date().getTime()) {
-      dispatch(clearToken()); // Clear expired token from Redux
+    if (isTokenExpired) {
+      dispatch(clearToken());
       toast.error("Session expired. Please log in again.");
-      navigate("/login"); // Redirect to the login page
+      navigate("/login");
     }
-  }, [dispatch, token, navigate]);
+  }, [dispatch, isTokenExpired, navigate]);
 
   // Load posts when the component mounts
   useEffect(() => {
     const loadPosts = async () => {
+      setLoading(true);
       try {
-        setLoading(true); // Show loading spinner before the fetch call
-        dispatch(fetchAllPosts()); // Fetch posts from the API
+        await dispatch(fetchAllPosts());
       } catch (error) {
         toast.error("Failed to load posts. Please try again.");
       } finally {
-        setLoading(false); // Hide loading spinner after the fetch is complete
+        setLoading(false);
       }
     };
 
     loadPosts();
   }, [dispatch]);
 
-  // Handle image click to open modal with post details
-  const handleImageClick = async (post) => {
-    await dispatch(fetchSinglePost(post._id)); // Fetch the latest post data including comments
-    dispatch(setSelectedPost(post)); // Update Redux state with selected post
-  };
+  // Open modal with post details
+  const handleImageClick = useCallback(async (post) => {
+    await dispatch(fetchSinglePost(post._id));
+    dispatch(setSelectedPost(post));
+  }, [dispatch]);
 
   // Close the modal
-  const closeModal = () => {
-    dispatch(setSelectedPost(null)); // Reset the selected post in Redux when modal is closed
-  };
+  const closeModal = useCallback(() => {
+    dispatch(setSelectedPost(null));
+  }, [dispatch]);
 
   // Handle like action
-  const handleLike = async (postId, isLiked) => {
+  const handleLike = useCallback(async (postId, isLiked) => {
     try {
-      const updatedPost = await dispatch(
-        likePost(postId, isLiked, posts, user._id)
-      );
-      if (updatedPost) {
-        console.log("Liked the post successfully:", updatedPost);
-      }
+      await dispatch(likePost(postId, isLiked, posts, user._id));
     } catch (error) {
       console.error("Error in handleLike:", error);
     }
-  };
+  }, [dispatch, posts, user]);
 
-  // Handle adding a comment to a post
-  const handleAddComment = (postId, commentText) => {
-    dispatch(addComment(postId, commentText, posts)); // Dispatch addComment action
-  };
+  // Handle adding a comment
+  const handleAddComment = useCallback((postId, commentText) => {
+    dispatch(addComment(postId, commentText, posts));
+  }, [dispatch, posts]);
 
   // Handle deleting a comment
-  const handleDeleteComment = (postId, commentId) => {
-    dispatch(deleteComment(postId, commentId, posts)); // Dispatch deleteComment action
-  };
+  const handleDeleteComment = useCallback((postId, commentId) => {
+    dispatch(deleteComment(postId, commentId, posts));
+  }, [dispatch, posts]);
 
   // Handle deleting a post
-  const handleDeletePost = (postId) => {
-    dispatch(deletePost(postId)); // Dispatch deletePost action
-  };
+  const handleDeletePost = useCallback((postId) => {
+    dispatch(deletePost(postId));
+  }, [dispatch]);
 
   return (
-    <div className="min-h-screen w-11/12 mx-auto p-6">
+    <div className="min-h-screen w-full flex flex-col items-center p-6">
       {/* Content Section */}
-      <div className="container min-h-screen w-full mx-auto">
+      <div className="container min-h-screen w-11/12 max-w-screen-lg mx-auto">
         {loading ? (
-          <Loading /> // Display Loading component while data is loading
+          <Loading />
         ) : posts.length > 0 ? (
           <Masonry
             breakpointCols={{ default: 5, 1100: 3, 700: 2, 500: 1 }}
-            className="my-masonry-grid"
+            className="my-masonry-grid mx-auto"
             columnClassName="my-masonry-grid_column"
           >
             {posts.map((post) => (
-              <div
-                key={post._id}
-                className="bg-white shadow-lg rounded-lg mb-6"
-              >
-                {/* Image Section with tilt effect on hover */}
-                {post.images && post.images.length > 0 && (
+              <div key={post._id} className="bg-white shadow-lg rounded-lg mb-6">
+                {post.images?.length > 0 && (
                   <motion.div
                     className="relative"
-                    whileHover={{ scale: 1.02, rotate: 2 }} // Reduced tilt effect (smaller scale and rotation)
+                    whileHover={{ scale: 1.02, rotate: 2 }}
                     transition={{ type: "spring", stiffness: 200 }}
-                    onClick={() => handleImageClick(post)} // Open modal on image click
+                    onClick={() => handleImageClick(post)}
                   >
                     <img
                       src={post.images[0].url}
@@ -134,23 +130,20 @@ const LoggedHomePage = () => {
             ))}
           </Masonry>
         ) : (
-          <p className="text-center text-gray-600">
-            No posts available at the moment.
-          </p>
+          <p className="text-center text-gray-600">No posts available at the moment.</p>
         )}
       </div>
 
       {/* Modal for Full Post Details */}
       {selectedPost && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center overflow-y-auto z-30"
-          onClick={closeModal} // Close modal on click outside
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30"
+          onClick={closeModal}
         >
           <div
-            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xl:h-[44rem]  p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
-            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
+            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xxl:h-[44rem]  p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* PostCard Component for displaying post details */}
             <PostCard
               post={selectedPost}
               onLike={handleLike}

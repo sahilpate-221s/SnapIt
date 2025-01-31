@@ -361,7 +361,7 @@ const Dashboard = () => {
           onClick={closePostModal} // Close modal on click outside
         >
           <div
-            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xl:h-[44rem] p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
+            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xxl:h-[44rem] p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
             onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
           >
             <UserPostCard

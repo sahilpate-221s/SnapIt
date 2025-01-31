@@ -16,24 +16,13 @@ const collectionSchema = new mongoose.Schema(
     },
     posts: [
       {
-        title: {
-          type: String,
-          required: true,
-        },
-        description: {
-          type: String,
-        },
         images: [
           {
             id: String, // Cloudinary ID
             url: String, // Cloudinary URL
           },
         ],
-        tags: [
-          {
-            type: String,
-          },
-        ],
+
         createdAt: {
           type: Date,
           default: Date.now,

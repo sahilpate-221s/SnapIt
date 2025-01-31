@@ -1,34 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
 import logo from "../../assets/logo.png";
-import { useSelector } from "react-redux";
-import ProfileDropdown from "../core/Auth/ProfileDropdown"; // Import the ProfileDropdown component
+import { useSelector, shallowEqual } from "react-redux";
+import ProfileDropdown from "../core/Auth/ProfileDropdown";
+
+// Navigation items outside the component to avoid re-creation on each render
+const navItems = [
+  { name: "Home", path: "/" },
+  { name: "Explore", path: "/explore" },
+  { name: "Create", path: "/create" },
+  { name: "Collections", path: "/collections" },
+];
 
 const Navbar = () => {
-  const { token } = useSelector((state) => state.auth); // Get token from Redux state
-  const { user } = useSelector((state) => state.profile); // Get user info from Redux state
-  const location = useLocation(); // Get the current route
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Manage menu toggle for mobile
+  const { token } = useSelector((state) => state.auth, shallowEqual);
+  const { user } = useSelector((state) => state.profile, shallowEqual);
+  const location = useLocation();
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Explore", path: "/explore" },
-    { name: "Create", path: "/create" },
-    { name: "Collections", path: "/collections" },
-  ];
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Memoized function to determine active link class
+  const getNavLinkClass = useCallback(
+    (path) =>
+      location.pathname === path
+        ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
+        : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105",
+    [location.pathname]
+  );
+
+  // Toggle mobile menu
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, []);
+
+  // Close menu
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-10 bg-white shadow-md h-20 flex items-center w-full">
       <div className="container mx-auto flex justify-between items-center w-11/12 max-w-maxContent">
         {/* Left Section: Logo and Search or Navigation Links */}
         <div className="flex items-center space-x-4">
-          <img
-            src={logo}
-            alt="Logo"
-            className="h-12 rounded-full md:h-14" // Adjusted size for the circle on tablets
-          />
+          <img src={logo} alt="Logo" className="h-12 rounded-full md:h-14" />
           {token ? (
             <div className="relative items-center hidden md:flex">
               <input
@@ -41,16 +58,14 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <div className="hidden md:flex items-center space-x-2"> {/* Reduced gap for tablets */}
+            <div className="hidden md:flex items-center space-x-2">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`${
-                    location.pathname === item.path
-                      ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
-                      : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
-                  } flex items-center justify-center px-4 py-3 rounded-lg focus:outline-none focus:ring-0`}
+                  className={`flex items-center justify-center px-4 py-3 rounded-lg focus:outline-none focus:ring-0 ${getNavLinkClass(
+                    item.path
+                  )}`}
                 >
                   <p className="font-semibold">{item.name}</p>
                 </Link>
@@ -60,18 +75,16 @@ const Navbar = () => {
         </div>
 
         {/* Right Section: Navigation Links or ProfileDropdown */}
-        <div className="flex items-center space-x-4 md:space-x-2"> {/* Reduced gap for tablets */}
+        <div className="flex items-center space-x-4 md:space-x-2">
           {token ? (
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`${
-                    location.pathname === item.path
-                      ? "bg-gradient-to-r from-gray-300 to-gray-400 text-black shadow-lg"
-                      : "text-gray-700 hover:text-black hover:bg-gray-200 transition duration-300 ease-in-out transform hover:scale-105"
-                  } flex items-center justify-center md:px-1 lg:px-3 py-3 rounded-lg focus:outline-none focus:ring-0`}
+                  className={`flex items-center justify-center md:px-1 lg:px-3 py-3 rounded-lg focus:outline-none focus:ring-0 ${getNavLinkClass(
+                    item.path
+                  )}`}
                 >
                   <p className="font-semibold">{item.name}</p>
                 </Link>
@@ -79,7 +92,7 @@ const Navbar = () => {
               <ProfileDropdown />
             </div>
           ) : (
-            <div className="hidden md:flex space-x-2"> {/* Reduced gap for tablets */}
+            <div className="hidden md:flex space-x-2">
               <Link
                 to="/register"
                 className="text-gray-600 hover:text-black hover:bg-gray-200 px-3 py-1 rounded-md"
@@ -96,10 +109,7 @@ const Navbar = () => {
           )}
 
           {/* Mobile Menu Toggle */}
-          <button
-            className="text-black md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
+          <button className="text-black md:hidden" onClick={toggleMenu}>
             <AiOutlineMenu size={24} />
           </button>
         </div>
@@ -112,68 +122,53 @@ const Navbar = () => {
         } transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-300">
-          <img
-            src={logo}
-            alt="Logo"
-            className="h-8 rounded-full" // Adjusted size for mobile logo
-          />
-          <button className="text-black" onClick={() => setIsMenuOpen(false)}>
+          <img src={logo} alt="Logo" className="h-8 rounded-full" />
+          <button className="text-black" onClick={closeMenu}>
             <AiOutlineClose size={24} />
           </button>
         </div>
 
         <div className="flex flex-col mt-4 space-y-2 px-4">
-          {token && (
-            <div className="flex flex-col space-y-2">
-              {/* Profile Dropdown first */}
-              <ProfileDropdown />
-            </div>
-          )}
+          {token && <ProfileDropdown />}
 
-          {/* Other navigation links */}
           {navItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
-              className={`${
+              className={`px-3 py-2 rounded-xl focus:outline-none focus:ring-0 ${
                 location.pathname === item.path
-                  ? "bg-gray-400 text-black rounded-xl"
+                  ? "bg-gray-400 text-black"
                   : "text-gray-600 hover:text-black hover:rounded-xl"
-              } px-3 py-2 focus:outline-none focus:ring-0`} // Added focus:outline-none to remove focus border
-              onClick={() => setIsMenuOpen(false)}
+              }`}
+              onClick={closeMenu}
             >
               {item.name}
             </Link>
           ))}
         </div>
 
-        <div className="flex flex-col mt-4 space-y-2 px-4 border-t border-gray-300 pt-4">
-          {token ? null : (
-            <>
-              <Link
-                to="/register"
-                className="text-gray-600 hover:text-black hover:bg-gray-200 px-3 py-2 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Register
-              </Link>
-              <Link
-                to="/login"
-                className="text-gray-600 hover:text-black hover:bg-gray-200 px-3 py-2 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Login
-              </Link>
-            </>
-          )}
-        </div>
+        {!token && (
+          <div className="flex flex-col mt-4 space-y-2 px-4 border-t border-gray-300 pt-4">
+            <Link
+              to="/register"
+              className="text-gray-600 hover:text-black hover:bg-gray-200 px-3 py-2 rounded-md"
+              onClick={closeMenu}
+            >
+              Register
+            </Link>
+            <Link
+              to="/login"
+              className="text-gray-600 hover:text-black hover:bg-gray-200 px-3 py-2 rounded-md"
+              onClick={closeMenu}
+            >
+              Login
+            </Link>
+          </div>
+        )}
       </div>
 
       {isMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsMenuOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={closeMenu} />
       )}
     </nav>
   );

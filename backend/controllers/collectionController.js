@@ -45,12 +45,8 @@ export const createCollection = async (req, res) => {
 export const createPostInCollection = async (req, res) => {
   try {
     const { collectionId } = req.params;
-    const { title, description } = req.body;
     const files = req.files; // Array of uploaded images
 
-    if (!title || !description) {
-      return res.status(400).json({ message: "Title and description are required" });
-    }
 
     const collection = await Collection.findById(collectionId);
 
@@ -76,8 +72,6 @@ export const createPostInCollection = async (req, res) => {
 
     // Create the post object
     const newPost = {
-      title,
-      description,
       images: uploadedImages,
       createdBy: req.user._id,
     };

@@ -18,7 +18,7 @@ const router = express.Router();
 router.post("/newPost", isAuth, uploadFile, createPost);
 
 // Get all posts
-router.get("/allPosts", isAuth, getAllPosts);
+router.get("/allPosts", getAllPosts);
 
 // Get a single post by ID
 router.get("/:id", isAuth, getPostById);

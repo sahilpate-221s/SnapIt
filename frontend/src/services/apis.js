@@ -33,3 +33,13 @@ export const postEndpoints = {
   REACT_TO_POST_API: (postId) => `${BASE_URL}/posts/${postId}/reactions`,
   DELETE_COMMENT_API: (postId, commentId) => `${BASE_URL}/posts/${postId}/comments/${commentId}`,
 };
+
+
+// collection endpoints
+export const collectionEndpoints = {
+  CREATE_COLLECTION_API: `${BASE_URL}/collection/createCollection`,
+  ADD_POSTS_API: (collectionId) => `${BASE_URL}/collection/${collectionId}/posts`,
+  GET_ALL_COLLECTIONS_API: `${BASE_URL}/collection/all-Collections`,
+  DELTE_COLLECTION_API: (collectionId) => `${BASE_URL}/collection/${collectionId}`,
+  DELTET_COLLECTION_POSTS_API: `${BASE_URL}/collection/delete-posts`,
+};

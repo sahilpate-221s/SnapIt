@@ -109,8 +109,8 @@ const UserPostCard = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full mx-auto lg:h-[31rem] xl:h-[44rem]">
-      <div className="flex flex-wrap h-full w-full max-w-6xl lg:h-[31rem] xl:h-[44rem] relative">
+    <div className="flex flex-col items-center w-full mx-auto lg:h-[31rem] xxl:h-[44rem]">
+      <div className="flex flex-wrap h-full w-full max-w-6xl lg:h-[31rem] xxl:h-[44rem] relative">
         <div className="w-full h-full md:w-1/2 flex flex-col items-center justify-center relative">
           {post?.images && post.images.length > 0 ? (
             <>
