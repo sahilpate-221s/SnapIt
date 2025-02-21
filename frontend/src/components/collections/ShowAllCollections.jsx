@@ -1,43 +1,88 @@
-import React from 'react';
-
-// Mock data for collections, now including images
-const collections = [
-  { id: 1, name: 'Collection 1', description: 'Explore our amazing first collection.', image: 'https://via.placeholder.com/300x200/000000/FFFFFF?text=Collection+1' },
-  { id: 2, name: 'Collection 2', description: 'Discover the magic in the second collection.', image: 'https://via.placeholder.com/300x200/000000/FFFFFF?text=Collection+2' },
-  { id: 3, name: 'Collection 3', description: 'Dive into the depths of the third collection.', image: 'https://via.placeholder.com/300x200/000000/FFFFFF?text=Collection+3' },
-  { id: 4, name: 'Collection 4', description: 'Check out the exclusive fourth collection.', image: 'https://via.placeholder.com/300x200/000000/FFFFFF?text=Collection+4' },
-  { id: 5, name: 'Collection 5', description: 'Experience the fifth collection with premium features.', image: 'https://via.placeholder.com/300x200/000000/FFFFFF?text=Collection+5' },
-  { id: 6, name: 'Collection 6', description: 'Unveil the wonders in the sixth collection.', image: 'https://via.placeholder.com/300x200/000000/FFFFFF?text=Collection+6' },
-];
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getCollection } from "../../services/operations/CollectionAPI.js"; // Ensure correct path
+import { Loading } from "../common/Loading"; // Ensure this exists
+import { toast } from "react-toastify";
 
 const ShowAllCollections = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Get collections & user data from Redux
+  const { collections, loading, error } = useSelector((state) => state.collections);
+  const { user } = useSelector((state) => state.profile); // Ensure this slice exists in Redux
+
+  // Fetch collections on component mount
+  useEffect(() => {
+    dispatch(getCollection());
+  }, [dispatch]);
+
+  // 🔥 Debugging: Check user data in console
+  console.log("User:", user);
+  console.log("Collections:", collections);
+
+  // **Ensure user is available before filtering**
+  const userCollections = user
+    ? collections.filter((collection) => collection.createdBy === user._id)
+    : [];
+
+  // Handle Card Click to redirect to a page showing all images
+  const handleCardClick = (collectionId) => {
+    navigate(`/collection/${collectionId}/images`);
+  };
+
   return (
-    <div className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-screen-xl mx-auto">
-        <h2 className="text-4xl font-semibold text-gray-800 text-center mb-10">All Collections</h2>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-8 lg:px-16 flex flex-col items-center">
+      <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-4">
+        Your Collections
+      </h2>
+      <p className="text-lg text-gray-600 max-w-2xl text-center mb-10">
+        Handpicked by you for those who appreciate design at its finest.
+      </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {collections.map((collection) => (
-            <div
-              key={collection.id}
-              className="relative bg-white border border-gray-200 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-            >
+      {/* Show Loading State */}
+      {loading ? (
+        <Loading />
+      ) : error ? (
+        <p className="text-red-500 text-lg">{toast.error(error)}</p>
+      ) : userCollections.length === 0 ? (
+        <p className="text-gray-500 text-lg">You have not created any collections yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl">
+          {userCollections.map((collection) => {
+            // Extract first image from posts array for collection thumbnail
+            const collectionImage =
+              collection.posts?.[0]?.images?.[0]?.url ||
+              "https://via.placeholder.com/600x400/000000/FFFFFF?text=No+Image";
+
+            return (
               <div
-                className="w-full h-56 bg-cover bg-center rounded-t-xl"
-                style={{ backgroundImage: `url(${collection.image})` }}
-              ></div>
+                key={collection._id}
+                onClick={() => handleCardClick(collection._id)}
+                className="group bg-white shadow-md rounded-lg overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+              >
+                {/* Image Section */}
+                <div className="relative w-full h-60">
+                  <img
+                    src={collectionImage}
+                    alt={collection.name}
+                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-white text-lg font-semibold">
+                    {collection.name}
+                  </div>
+                </div>
 
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold text-gray-900">{collection.name}</h3>
-                <p className="text-sm text-gray-600 mt-2">{collection.description}</p>
-                <button className="mt-4 w-full py-2 px-4 text-sm text-white bg-gray-800 rounded-lg transition-all duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
-                  View Details
-                </button>
+                {/* Details Section */}
+                <div className="p-5">
+                  <p className="text-gray-700 text-sm">{collection.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 };

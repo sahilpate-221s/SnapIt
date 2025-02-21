@@ -86,12 +86,12 @@ function ProfileDropdown() {
               >
                 Dashboard
               </Link>
-              <div
+              {/* <div
                 onClick={handleCollection}
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 Create Collections
-              </div>
+              </div> */}
               <div
                 onClick={handleLogout}
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"

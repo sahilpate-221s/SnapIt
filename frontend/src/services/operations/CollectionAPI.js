@@ -103,6 +103,7 @@ export const getCollection = () => {
       const response = await axios.get(GET_ALL_COLLECTIONS_API, {
         withCredentials: true,
       });
+      console.log(response.data);
       const { success, collections, message } = response?.data;
       if (success) {
         dispatch(setCollections(collections));

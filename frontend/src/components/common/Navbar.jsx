@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import logo from "../../assets/logo.png";
+// import logo from "../../assets/logo.png";
+import snapit from "../../assets/SnapIt.png";
 import { useSelector, shallowEqual } from "react-redux";
 import ProfileDropdown from "../core/Auth/ProfileDropdown";
 
@@ -11,13 +12,14 @@ const navItems = [
   { name: "Home", path: "/" },
   { name: "Explore", path: "/explore" },
   { name: "Create", path: "/create" },
-  { name: "Collections", path: "/collections" },
+  // { name: "Collections", path: "/collection/all-Collections" },
 ];
 
 const Navbar = () => {
   const { token } = useSelector((state) => state.auth, shallowEqual);
   const { user } = useSelector((state) => state.profile, shallowEqual);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -40,17 +42,22 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, []);
 
+  const snaphandler = () => 
+  {
+    navigate('/');
+  }
+
   return (
     <nav className="sticky top-0 z-10 bg-white shadow-md h-20 flex items-center w-full">
       <div className="container mx-auto flex justify-between items-center w-11/12 max-w-maxContent">
         {/* Left Section: Logo and Search or Navigation Links */}
         <div className="flex items-center space-x-4">
-          <img src={logo} alt="Logo" className="h-12 rounded-full md:h-14" />
+          <img src={snapit} alt="Logo" className="h-10  md:h-10 cursor-pointer" onClick={snaphandler}/>
           {token ? (
             <div className="relative items-center hidden md:flex">
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search !working on it"
                 className="font-serif h-8 md:w-40 lg:w-80 rounded-full p-2 border border-gray-300"
               />
               <div className="absolute right-2 bg-gray-200 p-1 rounded-full">
@@ -122,7 +129,7 @@ const Navbar = () => {
         } transition-transform duration-300 ease-in-out`}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-300">
-          <img src={logo} alt="Logo" className="h-8 rounded-full" />
+          <img src={snapit} alt="Logo" className="h-8 rounded-full" />
           <button className="text-black" onClick={closeMenu}>
             <AiOutlineClose size={24} />
           </button>

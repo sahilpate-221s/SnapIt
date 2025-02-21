@@ -21,12 +21,14 @@ const Error = () => {
 
         {/* Error Message */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-caveat text-gray-800 fade-in animate__animated animate__fadeIn animate__delay-1s">
-          Oops! Something Went Wrong
+          {/* Oops! Something Went Wrong */}
+          Work in progress will be adding this feature soon
         </h1>
 
         {/* Subtext with typing animation */}
         <p className="text-lg sm:text-xl md:text-2xl text-gray-500 fade-in font-diphylleia animate__animated animate__fadeIn animate__delay-1.5s">
-          The page you're looking for is not available. Please check the URL or return to the homepage.
+          {/* The page you're looking for is not available. Please check the URL or return to the homepage. */}
+          The page you're looking for is not available. We are working on it.
         </p>
 
         {/* Button */}

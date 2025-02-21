@@ -18,6 +18,7 @@ import TagPage from "./pages/TagPage";
 import ProfileUpdate from "./pages/ProfileUpdate";
 import AddPosts from "./components/collections/AddPosts";
 import ShowAllCollections from "./components/collections/ShowAllCollections";
+import GetCollectionPosts from "./components/collections/GetCollectionPosts";
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -62,8 +63,9 @@ function App() {
         {/* <Route path="/collections" element={<Collections />} /> */}
         <Route path="/edit-profile" element={<ProfileUpdate />} />
 
-        <Route path="/collection/:collectionId/posts" element={<AddPosts />} />
+        {/* <Route path="/collection/:collectionId/posts" element={<AddPosts />} />
         <Route path="/collection/all-Collections" element={<ShowAllCollections/>} />
+        <Route path= "/collection/:collectionId/images" element={<GetCollectionPosts />} /> */}
       </Routes>
     </div>
   );

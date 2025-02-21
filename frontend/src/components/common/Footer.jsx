@@ -7,17 +7,17 @@ const Footer = () => {
       <div className="flex flex-col md:flex-row justify-between items-center">
         {/* Left Side - Logo or Branding */}
         <div className="flex items-center space-x-4">
-          <div className="text-2xl font-caveat">CampusLife</div>
+          <div className="text-3xl font-caveat">SnapIt</div>
           <span className="text-sm text-gray-500">Empowering University Moments</span>
         </div>
 
         {/* Center - Links Section */}
         <div className="mt-4 md:mt-0 sm:grid sm:grid-cols-2 gap-6 sm:gap-4 md:flex md:space-x-6">
           {/* Links for Small and Medium devices in Grid, and Flex for large devices */}
-          <Link to="/home" className="hover:text-gray-700 transition duration-200 mb-2 sm:mb-0">
+          <Link to="/" className="hover:text-gray-700 transition duration-200 mb-2 sm:mb-0">
             Home
           </Link>
-          <Link to="/about" className="hover:text-gray-700 transition duration-200 mb-2 sm:mb-0">
+          <Link to="/error" className="hover:text-gray-700 transition duration-200 mb-2 sm:mb-0">
             About
           </Link>
           <Link to="/contact" className="hover:text-gray-700 transition duration-200 mb-2 sm:mb-0">
