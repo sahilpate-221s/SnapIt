@@ -287,8 +287,270 @@ const ProfileUpdate = ({ isOpen, onClose }) => {
 };
 
 ProfileUpdate.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
 };
 
 export default ProfileUpdate;
+
+
+
+
+// import { useEffect, useState } from "react";
+// import PropTypes from "prop-types";
+// import { useSelector, useDispatch } from "react-redux";
+// import { useNavigate } from "react-router-dom";
+// import { updateProfile } from "../services/operations/ProfileAPI";
+
+// const ProfileUpdate = ({ isOpen, onClose }) => {
+//   const { user } = useSelector((state) => state.profile);
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     email: "",
+//     bio: "",
+//     password: "",
+//     oldPassword: "",
+//     profilePicture: null,
+//   });
+
+//   const [previewUrl, setPreviewUrl] = useState(null);
+//   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
+
+//   // ✅ Sync form when user loads/changes
+//   useEffect(() => {
+//     if (!user) return;
+
+//     setFormData({
+//       name: user.name || "",
+//       email: user.email || "",
+//       bio: user.bio || "",
+//       password: "",
+//       oldPassword: "",
+//       profilePicture: null,
+//     });
+//   }, [user]);
+
+//   // ✅ Lock background scroll when modal open
+//   useEffect(() => {
+//     document.body.style.overflow = isOpen ? "hidden" : "auto";
+//     return () => {
+//       document.body.style.overflow = "auto";
+//     };
+//   }, [isOpen]);
+
+//   // cleanup preview URL
+//   useEffect(() => {
+//     return () => {
+//       if (previewUrl) URL.revokeObjectURL(previewUrl);
+//     };
+//   }, [previewUrl]);
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handleFileChange = (e) => {
+//     const file = e.target.files?.[0];
+//     if (!file) return;
+
+//     const preview = URL.createObjectURL(file);
+//     setPreviewUrl(preview);
+
+//     setFormData((prev) => ({
+//       ...prev,
+//       profilePicture: file,
+//     }));
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     try {
+//       const data = new FormData();
+//       data.append("name", formData.name);
+//       data.append("email", formData.email);
+//       data.append("bio", formData.bio);
+
+//       // ✅ only send passwords if provided
+//       if (formData.oldPassword) data.append("oldPassword", formData.oldPassword);
+//       if (formData.password) data.append("password", formData.password);
+
+//       if (formData.profilePicture) {
+//         data.append("profilePicture", formData.profilePicture);
+//       }
+
+//       const result = await dispatch(updateProfile(data));
+
+//       if (result?.success) {
+//         onClose();
+//         navigate("/dashboard");
+//       }
+//     } catch (error) {
+//       console.error("Error updating profile:", error);
+//     }
+//   };
+
+//   const handleDeleteAccount = () => {
+//     setIsDeleteConfirmVisible(true);
+//   };
+
+//   const confirmDeleteAccount = () => {
+//     console.log("Account deleted");
+//     onClose();
+//   };
+
+//   const cancelDeleteAccount = () => {
+//     setIsDeleteConfirmVisible(false);
+//   };
+
+//   if (!isOpen) return null;
+
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+//       <div className="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-lg md:max-w-2xl lg:max-w-3xl overflow-hidden my-6 max-h-[90vh] overflow-y-auto">
+//         {/* Close Button */}
+//         <button
+//           className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 p-2"
+//           onClick={onClose}
+//         >
+//           ✕
+//         </button>
+
+//         <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+//           Update Your Profile
+//         </h1>
+
+//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//           {/* Image */}
+//           <div className="flex flex-col items-center space-y-4">
+//             <div className="relative w-36 h-36 rounded-full border bg-gray-100 overflow-hidden">
+//               {previewUrl ? (
+//                 <img src={previewUrl} className="w-full h-full object-cover" />
+//               ) : user?.profilePicture ? (
+//                 <img
+//                   src={user.profilePicture}
+//                   className="w-full h-full object-cover"
+//                 />
+//               ) : (
+//                 <div className="flex items-center justify-center h-full text-gray-500">
+//                   No Image
+//                 </div>
+//               )}
+
+//               <label
+//                 htmlFor="profilePicture"
+//                 className="absolute bottom-2 right-2 bg-black text-white p-2 rounded-full cursor-pointer"
+//               >
+//                 ✎
+//               </label>
+//               <input
+//                 type="file"
+//                 id="profilePicture"
+//                 accept="image/*"
+//                 onChange={handleFileChange}
+//                 className="hidden"
+//               />
+//             </div>
+//           </div>
+
+//           {/* Form */}
+//           <form onSubmit={handleSubmit} className="space-y-4">
+//             <input
+//               name="name"
+//               value={formData.name}
+//               onChange={handleChange}
+//               placeholder="Full Name"
+//               className="w-full p-3 border rounded-md"
+//             />
+
+//             <input
+//               value={formData.email}
+//               readOnly
+//               className="w-full p-3 border rounded-md bg-gray-100 cursor-not-allowed"
+//             />
+
+//             <textarea
+//               name="bio"
+//               value={formData.bio}
+//               onChange={handleChange}
+//               rows="3"
+//               className="w-full p-3 border rounded-md"
+//               placeholder="Bio"
+//             />
+
+//             <input
+//               type="password"
+//               name="oldPassword"
+//               value={formData.oldPassword}
+//               onChange={handleChange}
+//               placeholder="Old password"
+//               className="w-full p-3 border rounded-md"
+//             />
+
+//             <input
+//               type="password"
+//               name="password"
+//               value={formData.password}
+//               onChange={handleChange}
+//               placeholder="New password"
+//               className="w-full p-3 border rounded-md"
+//             />
+
+//             <button
+//               type="submit"
+//               className="w-full py-3 bg-black text-white rounded-md hover:bg-gray-800"
+//             >
+//               Save Changes
+//             </button>
+//           </form>
+//         </div>
+
+//         {/* Delete account */}
+//         <div className="mt-6">
+//           <button
+//             onClick={handleDeleteAccount}
+//             className="w-full py-3 bg-red-600 text-white rounded-md hover:bg-red-700"
+//           >
+//             Delete Account
+//           </button>
+//         </div>
+//       </div>
+
+//       {isDeleteConfirmVisible && (
+//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-xl max-w-xs w-full">
+//             <h2 className="text-lg font-semibold mb-3">Are you sure?</h2>
+//             <p className="text-sm text-gray-600 mb-4">
+//               This action cannot be undone.
+//             </p>
+//             <div className="flex gap-3">
+//               <button
+//                 onClick={confirmDeleteAccount}
+//                 className="flex-1 bg-red-600 text-white py-2 rounded"
+//               >
+//                 Delete
+//               </button>
+//               <button
+//                 onClick={cancelDeleteAccount}
+//                 className="flex-1 bg-gray-300 py-2 rounded"
+//               >
+//                 Cancel
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// ProfileUpdate.propTypes = {
+//   isOpen: PropTypes.bool.isRequired,
+//   onClose: PropTypes.func.isRequired,
+// };
+
+// export default ProfileUpdate;

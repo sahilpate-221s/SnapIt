@@ -1,36 +1,45 @@
-import axios from 'axios';
+import axios from "axios";
 
-// Create axios instance with default config
 const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true,
-  baseURL: "https://snapit-2.onrender.com/api/v1",
+  timeout: 15000,
 });
 
-// Request interceptor to add token
+// Attach token safely
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    if (token && token !== "null" && token !== "undefined") {
-      const parsedToken = JSON.parse(token);
-      config.headers.Authorization = `Bearer ${parsedToken}`;
+
+    if (token && token !== "undefined" && token !== "null") {
+      try {
+        config.headers.Authorization = `Bearer ${JSON.parse(token)}`;
+      } catch {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle auth errors
+// Handle auth failures safely
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      // Clear invalid token
+    const status = error?.response?.status;
+
+    if (status === 401 || status === 403) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+
+      // avoid infinite redirect loop
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
+
     return Promise.reject(error);
   }
 );

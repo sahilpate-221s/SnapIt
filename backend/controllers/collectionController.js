@@ -13,7 +13,7 @@ const parser = new DataURIParser();
  */
 export const createCollection = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name , description } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Collection name is required" });

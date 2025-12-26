@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../axiosConfig";
 import { toast } from "react-toastify";
 import { profileEndpoints } from "../apis";
 

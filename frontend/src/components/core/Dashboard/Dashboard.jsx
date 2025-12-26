@@ -1,6 +1,5 @@
 // import React, { useState, useEffect } from "react";
 // import { useSelector, useDispatch } from "react-redux";
-// import { Link } from "react-router-dom";
 // import { toast } from "react-toastify";
 // import {
 //   fetchAllPosts,
@@ -13,6 +12,7 @@
 // import { setSelectedPost } from "../../../slices/postSlice"; // Redux action to set the selected post
 // import { Loading } from "../../common/Loading"; // Loading spinner
 // import Footer from "../../common/Footer";
+// import ProfileUpdate from "../../../pages/ProfileUpdate"; // Profile Update Modal
 
 // const Dashboard = () => {
 //   const dispatch = useDispatch();
@@ -20,6 +20,7 @@
 //   const posts = useSelector((state) => state.posts.posts || []); // Posts list
 //   const selectedPost = useSelector((state) => state.posts.selectedPost); // Selected post for modal
 //   const [loading, setLoading] = useState(false); // Loading state
+//   const [editModalOpen, setEditModalOpen] = useState(false); // State for edit profile modal
 
 //   // Fetch posts on mount
 //   useEffect(() => {
@@ -38,20 +39,31 @@
 //   }, [dispatch]);
 
 //   // Filter posts created by the user
-//   const userPosts = posts.filter((post) => post.createdBy === user._id);
+//   const userPosts = posts.filter((post) => {
+//     // Handle null, populated, and unpopulated createdBy field
+//     if (!post.createdBy) return false;
+//     const postCreatorId = typeof post.createdBy === 'object' ? post.createdBy._id : post.createdBy;
+//     return postCreatorId === user._id;
+//   });
 
 //   // Open post details in a modal
 //   const handlePostClick = async (post) => {
 //     try {
-//       await dispatch(fetchSinglePost(post._id));
-//       dispatch(setSelectedPost(post));
+//       const result = await dispatch(fetchSinglePost(post._id));
+//       // Use the fetched post data which includes populated user information
+//       if (result && result.post) {
+//         dispatch(setSelectedPost(result.post));
+//       } else {
+//         dispatch(setSelectedPost(post));
+//       }
 //     } catch (error) {
 //       toast.error("Failed to load post details.");
+//       dispatch(setSelectedPost(post));
 //     }
 //   };
 
-//   // Close the modal
-//   const closeModal = () => {
+//   // Close the post modal
+//   const closePostModal = () => {
 //     dispatch(setSelectedPost(null));
 //   };
 
@@ -60,20 +72,19 @@
 //     try {
 //       await dispatch(deletePost(postId));
 //       toast.success("Post deleted successfully.");
-//       closeModal(); // Close modal after deletion
+//       closePostModal(); // Close modal after deletion
 //     } catch (error) {
 //       toast.error("Failed to delete post. Please try again.");
 //     }
 //   };
 
-//    const handleAddComment = (postId, commentText) => {
-//       dispatch(addComment(postId, commentText,posts)); // Dispatch addComment action
-//       // toast.success("comment addded successfully.");
-//     };
+//   const handleAddComment = (postId, commentText) => {
+//     dispatch(addComment(postId, commentText, posts)); // Dispatch addComment action
+//   };
 
-//     const handleDeleteComment = (postId, commentId) => {
-//         dispatch(deleteComment(postId, commentId,posts)); // Dispatch deleteComment action
-//       };
+//   const handleDeleteComment = (postId, commentId) => {
+//     dispatch(deleteComment(postId, commentId, posts)); // Dispatch deleteComment action
+//   };
 
 //   return (
 //     <div className="min-h-screen bg-gray-50 w-11/12 mx-auto p-6">
@@ -93,12 +104,12 @@
 //               </h1>
 //               <p className="text-gray-600">@{user.name}</p>
 //               <p className="mt-2 text-lg text-gray-700">{user.bio}</p>
-//               <Link
-//                 to="/edit-profile"
+//               <button
+//                 onClick={() => setEditModalOpen(true)} // Open the ProfileUpdateModal
 //                 className="mt-4 px-4 py-2 bg-gradient-to-r from-gray-400 to-gray-600 text-white rounded-lg hover:from-gray-500 hover:to-gray-700 transition"
 //               >
 //                 Edit Profile
-//               </Link>
+//               </button>
 //             </div>
 //           </div>
 
@@ -106,13 +117,13 @@
 //           <div className="flex space-x-8">
 //             <div className="text-center">
 //               <p className="text-xl font-bold text-gray-800">
-//                 {user.followers > 0 ? user.followers : 0}
+//                 {user.followers?.length || 0}
 //               </p>
 //               <p className="text-sm text-gray-500">Followers</p>
 //             </div>
 //             <div className="text-center">
 //               <p className="text-xl font-bold text-gray-800">
-//                 {user.following > 0 ? user.following : 0}
+//                 {user.following?.length || 0}
 //               </p>
 //               <p className="text-sm text-gray-500">Following</p>
 //             </div>
@@ -163,25 +174,32 @@
 //       {/* Modal for Post Details */}
 //       {selectedPost && (
 //         <div
-//           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30 "
-//           onClick={closeModal} // Close modal on click outside
+//           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30"
+//           onClick={closePostModal} // Close modal on click outside
 //         >
 //           <div
-//             className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xl:h-[44rem]  p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
+//             className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xxl:h-[44rem] p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
 //             onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
 //           >
 //             <UserPostCard
 //               post={selectedPost}
 //               onDeletePost={handleDeletePost}
 //               onDeleteComment={handleDeleteComment}
-//               onAddComment ={handleAddComment}
-//               onClose={closeModal}
+//               onAddComment={handleAddComment}
+//               onClose={closePostModal}
 //             />
-            
-
 //           </div>
 //         </div>
 //       )}
+
+//       {/* Profile Update Modal */}
+//       {editModalOpen && (
+//         <ProfileUpdate
+//           isOpen={editModalOpen} // Pass isOpen prop as the state value
+//           onClose={() => setEditModalOpen(false)} // Close modal on button click
+//         />
+//       )}
+
 //       <Footer />
 //     </div>
 //   );
@@ -189,10 +207,7 @@
 
 // export default Dashboard;
 
-
-
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import {
@@ -201,91 +216,111 @@ import {
   fetchSinglePost,
   deleteComment,
   addComment,
+  likePost,
 } from "../../../services/operations/PostAPI";
-import UserPostCard from "./UserPostCard"; // Modal for post details
-import { setSelectedPost } from "../../../slices/postSlice"; // Redux action to set the selected post
-import { Loading } from "../../common/Loading"; // Loading spinner
+import PostCard from "../Posts/PostCard";
+import { setSelectedPost } from "../../../slices/postSlice";
+import { Loading } from "../../common/Loading";
 import Footer from "../../common/Footer";
-import ProfileUpdate from "../../../pages/ProfileUpdate"; // Profile Update Modal
+import ProfileUpdate from "../../../pages/ProfileUpdate";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.profile.user); // User profile
-  const posts = useSelector((state) => state.posts.posts || []); // Posts list
-  const selectedPost = useSelector((state) => state.posts.selectedPost); // Selected post for modal
-  const [loading, setLoading] = useState(false); // Loading state
-  const [editModalOpen, setEditModalOpen] = useState(false); // State for edit profile modal
 
-  // Fetch posts on mount
+  const user = useSelector((state) => state.profile.user);
+  const posts = useSelector((state) => state.posts.posts || []);
+  const selectedPost = useSelector((state) => state.posts.selectedPost);
+
+  const [loading, setLoading] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
   useEffect(() => {
+    let mounted = true;
+
     const loadPosts = async () => {
       try {
         setLoading(true);
         await dispatch(fetchAllPosts());
-      } catch (error) {
-        toast.error("Failed to load posts. Please try again.");
+      } catch {
+        toast.error("Failed to load posts.");
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     loadPosts();
+
+    return () => {
+      mounted = false;
+    };
   }, [dispatch]);
 
-  // Filter posts created by the user
-  const userPosts = posts.filter((post) => {
-    // Handle null, populated, and unpopulated createdBy field
-    if (!post.createdBy) return false;
-    const postCreatorId = typeof post.createdBy === 'object' ? post.createdBy._id : post.createdBy;
-    return postCreatorId === user._id;
-  });
+  const userPosts = useMemo(() => {
+    if (!user?._id) return [];
 
-  // Open post details in a modal
+    return posts.filter((post) => {
+      if (!post?.createdBy) return false;
+      const creatorId =
+        typeof post.createdBy === "object"
+          ? post.createdBy._id
+          : post.createdBy;
+      return creatorId === user._id;
+    });
+  }, [posts, user]);
+
   const handlePostClick = async (post) => {
     try {
       const result = await dispatch(fetchSinglePost(post._id));
-      // Use the fetched post data which includes populated user information
-      if (result && result.post) {
+      if (result?.post) {
         dispatch(setSelectedPost(result.post));
       } else {
         dispatch(setSelectedPost(post));
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load post details.");
       dispatch(setSelectedPost(post));
     }
   };
 
-  // Close the post modal
   const closePostModal = () => {
     dispatch(setSelectedPost(null));
   };
 
-  // Handle delete post
   const handleDeletePost = async (postId) => {
     try {
       await dispatch(deletePost(postId));
-      toast.success("Post deleted successfully.");
-      closePostModal(); // Close modal after deletion
-    } catch (error) {
-      toast.error("Failed to delete post. Please try again.");
+      toast.success("Post deleted successfully");
+      closePostModal();
+    } catch {
+      toast.error("Failed to delete post.");
     }
   };
 
   const handleAddComment = (postId, commentText) => {
-    dispatch(addComment(postId, commentText, posts)); // Dispatch addComment action
+    dispatch(addComment(postId, commentText, posts));
   };
 
   const handleDeleteComment = (postId, commentId) => {
-    dispatch(deleteComment(postId, commentId, posts)); // Dispatch deleteComment action
+    dispatch(deleteComment(postId, commentId, posts));
   };
+
+  const handleLike = async (postId, isLiked) => {
+    if (!user?._id) return;
+
+    try {
+      await dispatch(likePost(postId, isLiked, posts, user._id));
+    } catch (err) {
+      console.error("Like failed:", err);
+    }
+  };
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 w-11/12 mx-auto p-6">
       {/* Profile Header */}
       <div className="bg-white shadow-lg rounded-b-2xl mb-6">
         <div className="flex flex-col lg:flex-row items-center justify-between px-4 py-8">
-          {/* User Info */}
           <div className="flex items-center space-x-6">
             <img
               src={user.profilePicture || "/placeholder-profile.png"}
@@ -299,60 +334,51 @@ const Dashboard = () => {
               <p className="text-gray-600">@{user.name}</p>
               <p className="mt-2 text-lg text-gray-700">{user.bio}</p>
               <button
-                onClick={() => setEditModalOpen(true)} // Open the ProfileUpdateModal
-                className="mt-4 px-4 py-2 bg-gradient-to-r from-gray-400 to-gray-600 text-white rounded-lg hover:from-gray-500 hover:to-gray-700 transition"
+                onClick={() => setEditModalOpen(true)}
+                className="mt-4 px-4 py-2 bg-gradient-to-r from-gray-400 to-gray-600 text-white rounded-lg hover:from-gray-500 hover:to-gray-700"
               >
                 Edit Profile
               </button>
             </div>
           </div>
 
-          {/* User Stats */}
           <div className="flex space-x-8">
             <div className="text-center">
-              <p className="text-xl font-bold text-gray-800">
-                {user.followers?.length || 0}
-              </p>
+              <p className="text-xl font-bold">{user.followers?.length || 0}</p>
               <p className="text-sm text-gray-500">Followers</p>
             </div>
             <div className="text-center">
-              <p className="text-xl font-bold text-gray-800">
-                {user.following?.length || 0}
-              </p>
+              <p className="text-xl font-bold">{user.following?.length || 0}</p>
               <p className="text-sm text-gray-500">Following</p>
             </div>
             <div className="text-center">
-              <p className="text-xl font-bold text-gray-800">
-                {userPosts.length}
-              </p>
+              <p className="text-xl font-bold">{userPosts.length}</p>
               <p className="text-sm text-gray-500">Posts</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Posts Section */}
+      {/* Posts */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">My Posts</h2>
+        <h2 className="text-2xl font-semibold mb-6">My Posts</h2>
 
         {loading ? (
           <Loading />
         ) : userPosts.length === 0 ? (
-          <p className="text-center text-lg text-gray-600">
-            You have no posts yet!
-          </p>
+          <p className="text-center text-gray-600">You have no posts yet!</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 cursor-pointer">
             {userPosts.map((post) => (
               <div
                 key={post._id}
-                className="relative group rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow"
+                className="relative group rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition"
                 onClick={() => handlePostClick(post)}
               >
                 <img
-                  src={post.images[0]?.url || "/placeholder.png"}
+                  src={post.images?.[0]?.url || "/placeholder.png"}
                   alt={post.title}
-                  className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform"
+                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex items-center justify-center">
                   <p className="text-white text-lg font-semibold">
@@ -365,32 +391,33 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Modal for Post Details */}
       {selectedPost && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30"
-          onClick={closePostModal} // Close modal on click outside
+          onClick={closePostModal}
         >
           <div
-            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xxl:h-[44rem] p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg flex lg:my-auto md:overflow-hidden"
-            onClick={(e) => e.stopPropagation()} // Prevent closing modal when clicking inside
+            className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xxl:h-[44rem]
+                 p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%]
+                 max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg
+                 flex lg:my-auto md:overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
-            <UserPostCard
+            <PostCard
               post={selectedPost}
-              onDeletePost={handleDeletePost}
-              onDeleteComment={handleDeleteComment}
+              onLike={handleLike}
               onAddComment={handleAddComment}
-              onClose={closePostModal}
+              onDeleteComment={handleDeleteComment}
+              onDeletePost={handleDeletePost}
             />
           </div>
         </div>
       )}
 
-      {/* Profile Update Modal */}
       {editModalOpen && (
         <ProfileUpdate
-          isOpen={editModalOpen} // Pass isOpen prop as the state value
-          onClose={() => setEditModalOpen(false)} // Close modal on button click
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
         />
       )}
 

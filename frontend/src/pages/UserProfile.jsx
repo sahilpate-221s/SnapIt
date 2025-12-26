@@ -3,7 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "../services/axiosConfig";
 import { profileEndpoints, postEndpoints } from "../services/apis";
-import { FaHeart, FaComment, FaExpand, FaTimes, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import {
+  FaHeart,
+  FaComment,
+  FaExpand,
+  FaTimes,
+  FaArrowLeft,
+  FaArrowRight,
+} from "react-icons/fa";
 import { Loading } from "../components/common/Loading";
 
 const UserProfile = () => {
@@ -17,27 +24,41 @@ const UserProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  
+
   // Modal state for image viewing
   const [selectedPost, setSelectedPost] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+  document.body.style.overflow = showModal ? "hidden" : "auto";
+  return () => {
+    document.body.style.overflow = "auto";
+  };
+}, [showModal]);
+
+
+  useEffect(() => {
+    if (!userId || !currentUser?._id) return;
+
     fetchUserProfile();
     fetchUserPosts();
-  }, [userId]);
+  }, [userId, currentUser?._id]);
 
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(profileEndpoints.USER_PROFILE_API(userId));
-      
+      const response = await axiosInstance.get(
+        profileEndpoints.USER_PROFILE_API(userId)
+      );
+
       if (response.data.success) {
         setUserProfile(response.data.user);
         setFollowersCount(response.data.user.followers?.length || 0);
         setFollowingCount(response.data.user.following?.length || 0);
-        setIsFollowing(response.data.user.followers?.includes(currentUser._id) || false);
+        setIsFollowing(
+          response.data.user.followers?.includes(currentUser._id) || false
+        );
       }
     } catch (error) {
       setError("Failed to load user profile");
@@ -49,8 +70,10 @@ const UserProfile = () => {
 
   const fetchUserPosts = async () => {
     try {
-      const response = await axiosInstance.get(profileEndpoints.USER_POSTS_API(userId));
-      
+      const response = await axiosInstance.get(
+        profileEndpoints.USER_POSTS_API(userId)
+      );
+
       if (response.data.success) {
         setUserPosts(response.data.posts);
       }
@@ -60,44 +83,47 @@ const UserProfile = () => {
   };
 
   const handleFollow = async () => {
+    const prevFollowing = isFollowing;
+    const prevFollowers = followersCount;
+
     try {
-      // Optimistically update the UI
-      const newIsFollowing = !isFollowing;
-      const newFollowersCount = newIsFollowing ? followersCount + 1 : followersCount - 1;
-      
-      // Update state immediately for real-time feel
-      setIsFollowing(newIsFollowing);
-      setFollowersCount(newFollowersCount);
-      
-      const response = await axiosInstance.post(profileEndpoints.FOLLOW_USER_API(userId), {});
-      
-      // Use the response data for accurate counts
+      const optimistic = !prevFollowing;
+
+      setIsFollowing(optimistic);
+      setFollowersCount(optimistic ? prevFollowers + 1 : prevFollowers - 1);
+
+      const response = await axiosInstance.post(
+        profileEndpoints.FOLLOW_USER_API(userId),
+        {}
+      );
+
       if (response.data) {
         setFollowersCount(response.data.followersCount);
         setFollowingCount(response.data.followingCount);
         setIsFollowing(response.data.isFollowing);
       }
-      
     } catch (error) {
-      console.error("Error following/unfollowing user:", error);
-      // Revert changes on error
-      setIsFollowing(isFollowing);
-      setFollowersCount(followersCount);
+      // rollback safely
+      setIsFollowing(prevFollowing);
+      setFollowersCount(prevFollowers);
+      console.error("Follow/unfollow failed:", error);
     }
   };
 
   const handleLike = async (postId) => {
     try {
       await axiosInstance.post(postEndpoints.REACT_TO_POST_API(postId), {});
-      
+
       // Re-fetch posts to update like status
       await fetchUserPosts();
-      
+
       // Update selected post if it's the one being liked
       if (selectedPost && selectedPost._id === postId) {
-        const updatedPost = userPosts.find(post => post._id === postId);
-        if (updatedPost) {
-          setSelectedPost(updatedPost);
+        const refreshed = await axiosInstance.get(
+          postEndpoints.SINGLE_POST_API(postId)
+        );
+        if (refreshed.data?.post) {
+          setSelectedPost(refreshed.data.post);
         }
       }
     } catch (error) {
@@ -106,7 +132,8 @@ const UserProfile = () => {
   };
 
   const checkIfLiked = (post) => {
-    return post.likes?.includes(currentUser._id) || false;
+    if (!post?.likes || !currentUser?._id) return false;
+    return post.likes.includes(currentUser._id);
   };
 
   const handlePostClick = (post) => {
@@ -121,19 +148,19 @@ const UserProfile = () => {
   };
 
   const handlePrevImage = () => {
-    if (selectedPost && selectedPost.images) {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === 0 ? selectedPost.images.length - 1 : prevIndex - 1
-      );
-    }
+    if (!selectedPost?.images?.length) return;
+
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? selectedPost.images.length - 1 : prev - 1
+    );
   };
 
   const handleNextImage = () => {
-    if (selectedPost && selectedPost.images) {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === selectedPost.images.length - 1 ? 0 : prevIndex + 1
-      );
-    }
+    if (!selectedPost?.images?.length) return;
+
+    setCurrentImageIndex((prev) =>
+      prev === selectedPost.images.length - 1 ? 0 : prev + 1
+    );
   };
 
   if (loading) {
@@ -160,7 +187,9 @@ const UserProfile = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">User not found</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            User not found
+          </h2>
           <button
             onClick={() => navigate("/")}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -191,7 +220,7 @@ const UserProfile = () => {
                 </h1>
                 <p className="text-gray-600">@{userProfile.name}</p>
                 <p className="mt-2 text-lg text-gray-700">{userProfile.bio}</p>
-                
+
                 {/* Follow/Unfollow Button */}
                 {currentUser._id !== userId && (
                   <button
@@ -211,15 +240,21 @@ const UserProfile = () => {
             {/* User Stats */}
             <div className="flex space-x-8 mt-4 lg:mt-0">
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-800">{userPosts.length}</div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {userPosts.length}
+                </div>
                 <div className="text-gray-600">Posts</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-800">{followersCount}</div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {followersCount}
+                </div>
                 <div className="text-gray-600">Followers</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-800">{followingCount}</div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {followingCount}
+                </div>
                 <div className="text-gray-600">Following</div>
               </div>
             </div>
@@ -230,7 +265,7 @@ const UserProfile = () => {
       {/* User Posts */}
       <div className="w-11/12 max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">Posts</h2>
-        
+
         {userPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {userPosts.map((post) => (
@@ -252,7 +287,9 @@ const UserProfile = () => {
                   </div>
                 )}
                 <div className="p-4">
-                  <h3 className="font-semibold text-gray-800 mb-2">{post.title}</h3>
+                  <h3 className="font-semibold text-gray-800 mb-2">
+                    {post.title}
+                  </h3>
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {post.description}
                   </p>
@@ -309,7 +346,7 @@ const UserProfile = () => {
             <button
               onClick={() => handleLike(selectedPost._id)}
               className={`absolute top-6 right-20 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-gray-800 ${
-                checkIfLiked(selectedPost) ? 'text-red-500' : 'text-white'
+                checkIfLiked(selectedPost) ? "text-red-500" : "text-white"
               }`}
             >
               <FaHeart className="text-xl" />

@@ -14,178 +14,143 @@ const {
 
 export function register(name, email, password, confirmPassword, navigate) {
   return async (dispatch) => {
-    dispatch(setLoading(true)); // Indicate that the process has started
+    dispatch(setLoading(true));
 
     try {
-      const response = await axiosInstance.post(
-        REGISTER_API,
-        { name, email, password, confirmPassword },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const { data } = await axiosInstance.post(REGISTER_API, {
+        name,
+        email,
+        password,
+        confirmPassword,
+      });
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Signup failed");
-      }
+      if (!data?.success) throw new Error(data?.message);
 
-      // Show success toast
       toast.success("Registration Successful");
 
-      // Update Redux state if needed
-      dispatch(setSignupData(response.data.user));
-      dispatch(setToken(response.data.token));
+      dispatch(setSignupData(data.user));
+      dispatch(setToken(data.token));
 
-      navigate("/"); // Redirect after successful registration
+      navigate("/");
     } catch (error) {
-      // Show error toast
-      const errorMessage =
-        error?.response?.data?.message || error.message || "Registration Failed";
-      toast.error(errorMessage);
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Registration Failed"
+      );
     } finally {
-      dispatch(setLoading(false)); // Indicate that the process has ended
+      dispatch(setLoading(false));
     }
   };
 }
-
 
 export function login(email, password, navigate) {
   return async (dispatch) => {
-    dispatch(setLoading(true)); // Indicate that the process has started
+    dispatch(setLoading(true));
 
     try {
-      const response = await axiosInstance.post(
-        LOGIN_API,
-        { email, password }
-      );
+      const { data } = await axiosInstance.post(LOGIN_API, { email, password });
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Login failed");
-      }
+      if (!data?.success) throw new Error(data?.message);
 
-      
-      // Update Redux state and localStorage
-      dispatch(setToken(response.data.token));
-      dispatch(setUser(response.data.user));
-      
-      localStorage.setItem("token", JSON.stringify(response.data.token));
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      
-      // Show success toast
+      dispatch(setToken(data.token));
+      dispatch(setUser(data.user));
+
+      localStorage.setItem("token", JSON.stringify(data.token));
+      localStorage.setItem("user", JSON.stringify(data.user));
+
       toast.success("Login Successful");
-      navigate("/"); // Redirect after login
+      navigate("/");
     } catch (error) {
-      // Show error toast
-      const errorMessage =
-        error?.response?.data?.message || error.message || "Login Failed";
-      toast.error(errorMessage);
+      toast.error(
+        error?.response?.data?.message || error.message || "Login Failed"
+      );
     } finally {
-      dispatch(setLoading(false)); // Indicate that the process has ended
+      dispatch(setLoading(false));
     }
   };
 }
-
 
 export function logout(navigate) {
   return async (dispatch) => {
-    dispatch(setLoading(true)); // Indicate that the process has started
+    dispatch(setLoading(true));
 
     try {
-      const response = await axiosInstance.get(LOGOUT_API);
+      const { data } = await axiosInstance.get(LOGOUT_API);
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Logout failed");
-      }
+      if (!data?.success) throw new Error(data?.message);
 
-      // Show success toast
       toast.success("Logout Successful");
 
-      // Clear Redux state and localStorage
-      dispatch(clearToken()); // Clear the token with the clearToken action
-      dispatch(setUser(null)); // Reset the user state
-      localStorage.removeItem("token"); // Remove token from localStorage
-      localStorage.removeItem("user"); // Remove user from localStorage
+      dispatch(clearToken());
+      dispatch(setUser(null));
 
-      navigate("/"); // Redirect to login page
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      navigate("/");
     } catch (error) {
-      // Show error toast
-      const errorMessage =
-        error?.response?.data?.message || error.message || "Logout Failed";
-      toast.error(errorMessage);
+      toast.error(
+        error?.response?.data?.message || error.message || "Logout Failed"
+      );
     } finally {
-      dispatch(setLoading(false)); // Indicate that the process has ended
+      dispatch(setLoading(false));
     }
   };
 }
 
-
-
 export function changePassword(currentPassword, newPassword, navigate) {
   return async (dispatch) => {
-    dispatch(setLoading(true)); // Indicate that the process has started
+    dispatch(setLoading(true));
 
     try {
-      const response = await axiosInstance.post(CHANGE_PASSWORD_API, {
+      const { data } = await axiosInstance.post(CHANGE_PASSWORD_API, {
         currentPassword,
         newPassword,
       });
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Change Password failed");
-      }
+      if (!data?.success) throw new Error(data?.message);
 
-      // Show success toast
       toast.success("Password Changed Successfully");
-
-      navigate("/profile"); // Redirect after password change
+      navigate("/profile");
     } catch (error) {
-      // Show error toast
-      const errorMessage =
+      toast.error(
         error?.response?.data?.message ||
-        error.message ||
-        "Change Password Failed";
-      toast.error(errorMessage);
+          error.message ||
+          "Change Password Failed"
+      );
     } finally {
-      dispatch(setLoading(false)); // Indicate that the process has ended
+      dispatch(setLoading(false));
     }
   };
 }
 
-
 export function deleteAccount(navigate) {
   return async (dispatch) => {
-    dispatch(setLoading(true)); // Indicate that the process has started
+    dispatch(setLoading(true));
 
     try {
-      const response = await axiosInstance.delete(DELETE_ACCOUNT_API);
+      const { data } = await axiosInstance.delete(DELETE_ACCOUNT_API);
 
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Delete Account failed");
-      }
+      if (!data?.success) throw new Error(data?.message);
 
-      // Show success toast
       toast.success("Account Deleted Successfully");
 
-      // Clear Redux state and localStorage
       dispatch(setToken(null));
       dispatch(setUser(null));
 
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
-      navigate("/register"); // Redirect to registration page
+      navigate("/register");
     } catch (error) {
-      // Show error toast
-      const errorMessage =
+      toast.error(
         error?.response?.data?.message ||
-        error.message ||
-        "Delete Account Failed";
-      toast.error(errorMessage);
+          error.message ||
+          "Delete Account Failed"
+      );
     } finally {
-      dispatch(setLoading(false)); // Indicate that the process has ended
+      dispatch(setLoading(false));
     }
   };
 }
-
