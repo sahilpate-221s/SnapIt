@@ -176,10 +176,176 @@
 
 
 
-import React, { useEffect, useState, useCallback } from "react";
+// import { useEffect, useState, useCallback } from "react";
+// import { useDispatch, useSelector, shallowEqual } from "react-redux";
+// import { toast } from "react-toastify";
+// import { useNavigate } from "react-router-dom";
+// import {
+//   fetchAllPosts,
+//   likePost,
+//   addComment,
+//   deleteComment,
+//   deletePost,
+//   fetchSinglePost,
+// } from "../../../services/operations/PostAPI";
+// import { Loading } from "../../common/Loading";
+// import Masonry from "react-masonry-css";
+// import PostCard from "./PostCard";
+// import { setSelectedPost } from "../../../slices/postSlice";
+// import { motion } from "framer-motion";
+
+// const LoggedHomePage = () => {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+
+//   const user = useSelector((state) => state.profile.user, shallowEqual);
+//   const posts = useSelector((state) => state.posts.posts || [], shallowEqual);
+//   const selectedPost = useSelector((state) => state.posts.selectedPost, shallowEqual);
+
+//   const [loading, setLoading] = useState(false);
+
+//   // Load posts safely
+//   useEffect(() => {
+//     const loadPosts = async () => {
+//       if (!posts || posts.length === 0) {
+//         setLoading(true);
+//         try {
+//           await dispatch(fetchAllPosts());
+//         } catch (err) {
+//           toast.error("Failed to load posts." + err);
+//         } finally {
+//           setLoading(false);
+//         }
+//       }
+//     };
+
+//     loadPosts();
+//   }, [dispatch]); // intentionally only once
+
+//   // Open modal with full post
+//   const handleImageClick = useCallback(
+//     async (post) => {
+//       try {
+//         const result = await dispatch(fetchSinglePost(post._id));
+//         dispatch(setSelectedPost(result?.post || post));
+//       } catch {
+//         dispatch(setSelectedPost(post));
+//       }
+//     },
+//     [dispatch]
+//   );
+
+//   const closeModal = useCallback(() => {
+//     dispatch(setSelectedPost(null));
+//   }, [dispatch]);
+
+//   const handleLike = useCallback(
+//     async (postId, isLiked) => {
+//       if (!user?._id) return;
+
+//       try {
+//         await dispatch(likePost(postId, isLiked, posts, user._id));
+//       } catch (err) {
+//         console.error("Like failed:", err);
+//       }
+//     },
+//     [dispatch, posts, user]
+//   );
+
+//   const handleAddComment = useCallback(
+//     (postId, commentText) => {
+//       dispatch(addComment(postId, commentText, posts));
+//     },
+//     [dispatch, posts]
+//   );
+
+//   const handleDeleteComment = useCallback(
+//     (postId, commentId) => {
+//       dispatch(deleteComment(postId, commentId, posts));
+//     },
+//     [dispatch, posts]
+//   );
+
+//   const handleDeletePost = useCallback(
+//     (postId) => {
+//       dispatch(deletePost(postId));
+//     },
+//     [dispatch]
+//   );
+
+//   return (
+//     <div className="min-h-screen w-full flex flex-col items-center p-6">
+//       <div className="container min-h-screen w-11/12 max-w-screen-lg mx-auto">
+//         {loading ? (
+//           <Loading />
+//         ) : posts.length > 0 ? (
+//           <Masonry
+//             breakpointCols={{ default: 5, 1100: 3, 700: 2, 500: 1 }}
+//             className="my-masonry-grid mx-auto"
+//             columnClassName="my-masonry-grid_column"
+//           >
+//             {posts.map((post) => (
+//               <div key={post._id} className="bg-white shadow-lg rounded-lg mb-6">
+//                 {post.images?.length > 0 && (
+//                   <motion.div
+//                     className="relative"
+//                     whileHover={{ scale: 1.02, rotate: 2 }}
+//                     transition={{ type: "spring", stiffness: 200 }}
+//                     onClick={() => handleImageClick(post)}
+//                   >
+//                     <img
+//                       src={post.images[0].url}
+//                       alt={post.title}
+//                       className="w-full object-cover rounded-lg cursor-pointer"
+//                     />
+//                     {post.images.length > 1 && (
+//                       <span className="absolute top-2 right-2 bg-black text-white text-xs px-2 py-1 rounded">
+//                         {post.images.length} images
+//                       </span>
+//                     )}
+//                   </motion.div>
+//                 )}
+//               </div>
+//             ))}
+//           </Masonry>
+//         ) : (
+//           <p className="text-center text-gray-600">
+//             No posts available at the moment.
+//           </p>
+//         )}
+//       </div>
+
+//       {selectedPost && (
+//         <div
+//           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30"
+//           onClick={closeModal}
+//         >
+//           <div
+//             className="bg-white sm:p-0 h-[85%] md:h-96 lg:h-[31rem] xxl:h-[44rem] p-4 rounded-lg w-[90%] sm:w-[80%] md:w-[70%] lg:w-[70%] max-w-screen-sm sm:max-w-screen-md lg:max-w-screen-lg"
+//             onClick={(e) => e.stopPropagation()}
+//           >
+//             <PostCard
+//               post={selectedPost}
+//               onLike={handleLike}
+//               onAddComment={handleAddComment}
+//               onDeleteComment={handleDeleteComment}
+//               onDeletePost={handleDeletePost}
+//             />
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default LoggedHomePage;
+
+
+
+
+
+import { useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import {
   fetchAllPosts,
   likePost,
@@ -196,33 +362,76 @@ import { motion } from "framer-motion";
 
 const LoggedHomePage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const observerRef = useRef(null);
+  const loadingRef = useRef(false);
+  const pageRef = useRef(1);
+  const hasMoreRef = useRef(true);
+  const initialLoadRef = useRef(false);
 
   const user = useSelector((state) => state.profile.user, shallowEqual);
-  const posts = useSelector((state) => state.posts.posts || [], shallowEqual);
-  const selectedPost = useSelector((state) => state.posts.selectedPost, shallowEqual);
+  const posts = useSelector((state) => state.posts.posts, shallowEqual);
+  const selectedPost = useSelector((state) => state.posts.selectedPost);
 
-  const [loading, setLoading] = useState(false);
-
-  // Load posts safely
+  // 🔹 Load initial posts
   useEffect(() => {
-    const loadPosts = async () => {
-      if (!posts || posts.length === 0) {
-        setLoading(true);
-        try {
-          await dispatch(fetchAllPosts());
-        } catch (err) {
-          toast.error("Failed to load posts.");
-        } finally {
-          setLoading(false);
+    if (initialLoadRef.current) return; // Prevent multiple calls
+    initialLoadRef.current = true;
+
+    const loadInitialPosts = async () => {
+      try {
+        const res = await dispatch(fetchAllPosts(1, 10));
+        if (!res?.posts || res.posts.length === 0) {
+          hasMoreRef.current = false;
+        } else {
+          pageRef.current = 2;
         }
+      } catch (e) {
+        console.error(e);
       }
     };
 
-    loadPosts();
-  }, [dispatch]); // intentionally only once
+    loadInitialPosts();
+  }, [dispatch]);
 
-  // Open modal with full post
+  // 🔹 Load more posts function
+  const loadMorePosts = useCallback(async () => {
+    if (loadingRef.current || !hasMoreRef.current) return;
+
+    loadingRef.current = true;
+
+    try {
+      const res = await dispatch(fetchAllPosts(pageRef.current, 10));
+
+      if (!res?.posts || res.posts.length === 0) {
+        hasMoreRef.current = false;
+      } else {
+        pageRef.current += 1;
+      }
+    } catch (e) {
+      console.error('Error loading more posts:', e);
+    } finally {
+      loadingRef.current = false;
+    }
+  }, [dispatch]);
+
+  // 🔹 IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.7 }
+    );
+
+    if (observerRef.current) observer.observe(observerRef.current);
+
+    return () => observer.disconnect();
+  }, [loadMorePosts]);
+
+  // ---------------- HANDLERS ----------------
+
   const handleImageClick = useCallback(
     async (post) => {
       try {
@@ -242,12 +451,7 @@ const LoggedHomePage = () => {
   const handleLike = useCallback(
     async (postId, isLiked) => {
       if (!user?._id) return;
-
-      try {
-        await dispatch(likePost(postId, isLiked, posts, user._id));
-      } catch (err) {
-        console.error("Like failed:", err);
-      }
+      await dispatch(likePost(postId, isLiked, posts, user._id));
     },
     [dispatch, posts, user]
   );
@@ -276,7 +480,7 @@ const LoggedHomePage = () => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center p-6">
       <div className="container min-h-screen w-11/12 max-w-screen-lg mx-auto">
-        {loading ? (
+        {posts.length === 0 ? (
           <Loading />
         ) : posts.length > 0 ? (
           <Masonry
@@ -313,8 +517,14 @@ const LoggedHomePage = () => {
             No posts available at the moment.
           </p>
         )}
+
+        {/* 👇 Infinite scroll trigger */}
+        {hasMoreRef.current && (
+          <div ref={observerRef} className="h-10" />
+        )}
       </div>
 
+      {/* Post Modal */}
       {selectedPost && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto z-30"

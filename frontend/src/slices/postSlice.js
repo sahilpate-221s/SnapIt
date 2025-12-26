@@ -22,14 +22,13 @@
 
 // export default postsSlice.reducer;
 
-
-
-
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   posts: [],
   selectedPost: null,
+  page: 1,
+  hasMore: true,
 };
 
 const postsSlice = createSlice({
@@ -42,9 +41,15 @@ const postsSlice = createSlice({
     setSelectedPost(state, action) {
       state.selectedPost = action.payload || null;
     },
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+    setHasMore: (state, action) => {
+      state.hasMore = action.payload;
+    },
   },
 });
 
-export const { setPosts, setSelectedPost } = postsSlice.actions;
+export const { setPosts, setSelectedPost, setPage, setHasMore } = postsSlice.actions;
 
 export default postsSlice.reducer;

@@ -83,14 +83,25 @@ const UserProfile = () => {
   };
 
   const handleFollow = async () => {
-    const prevFollowing = isFollowing;
-    const prevFollowers = followersCount;
+    const prevIsFollowing = isFollowing;
+    const prevFollowersCount = followersCount;
+    const prevFollowingCount = followingCount;
 
     try {
-      const optimistic = !prevFollowing;
+      // Optimistic update
+      const newIsFollowing = !prevIsFollowing;
+      setIsFollowing(newIsFollowing);
 
-      setIsFollowing(optimistic);
-      setFollowersCount(optimistic ? prevFollowers + 1 : prevFollowers - 1);
+      // Update counts based on action
+      if (newIsFollowing) {
+        // Following: increase both counts
+        setFollowersCount(prevFollowersCount + 1);
+        setFollowingCount(prevFollowingCount + 1);
+      } else {
+        // Unfollowing: decrease both counts
+        setFollowersCount(prevFollowersCount - 1);
+        setFollowingCount(prevFollowingCount - 1);
+      }
 
       const response = await axiosInstance.post(
         profileEndpoints.FOLLOW_USER_API(userId),
@@ -98,14 +109,16 @@ const UserProfile = () => {
       );
 
       if (response.data) {
+        // Use server response for accurate counts
         setFollowersCount(response.data.followersCount);
         setFollowingCount(response.data.followingCount);
         setIsFollowing(response.data.isFollowing);
       }
     } catch (error) {
-      // rollback safely
-      setIsFollowing(prevFollowing);
-      setFollowersCount(prevFollowers);
+      // Rollback all changes on error
+      setIsFollowing(prevIsFollowing);
+      setFollowersCount(prevFollowersCount);
+      setFollowingCount(prevFollowingCount);
       console.error("Follow/unfollow failed:", error);
     }
   };
@@ -225,10 +238,10 @@ const UserProfile = () => {
                 {currentUser._id !== userId && (
                   <button
                     onClick={handleFollow}
-                    className={`mt-4 px-6 py-2 rounded-lg transition ${
+                    className={`mt-4 px-6 py-2 rounded-lg transition font-medium ${
                       isFollowing
-                        ? "bg-gray-300 text-gray-700 hover:bg-gray-400"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
+                        ? "bg-gray-200 text-gray-800 hover:bg-gray-300 border border-gray-300"
+                        : "bg-gray-800 text-white hover:bg-gray-900"
                     }`}
                   >
                     {isFollowing ? "Unfollow" : "Follow"}

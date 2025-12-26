@@ -1,55 +1,56 @@
 # 📸 SnapIt – A Social Platform for College Students
 
-SnapIt is a full-stack social media platform designed specifically for college students to share images of events, social clubs, and campus activities. Built with modern web technologies, it provides a Pinterest-like experience tailored for the college community.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Now-blue?style=for-the-badge&logo=netlify)](https://snapitapp1.netlify.app)
+[![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=flat&logo=react)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=flat&logo=node.js)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat&logo=mongodb)](https://www.mongodb.com/)
 
-## 🌐 Live Demo
-**Live Link:** https://snapitapp1.netlify.app
+SnapIt is a **full-stack social media platform** designed specifically for college students to share images of events, social clubs, and campus activities. Built with modern web technologies, it provides a **Pinterest-like experience** with features like infinite scrolling, user authentication, and content organization.
 
 ## 🚀 Key Features
 
-### 🔐 Authentication & User Management
-- **Secure Registration & Login** with email/password
-- **JWT-based Authentication** with token refresh
-- **Profile Management** with custom display pictures
-- **Password Change** functionality
-- **Account Deletion** option
+### 🔐 Authentication System
+- **User Registration & Login** with email/password validation
+- **JWT-based Authentication** for secure sessions
+- **Profile Management** with display pictures via Cloudinary
 
 ### 👤 User Profiles
 - **Personal Profile Pages** with user information
-- **Follow/Unfollow System** for connecting with other students
+- **Follow/Unfollow System** for building connections
 - **Followers/Following Lists** with counts
-- **Profile Picture Upload** with Cloudinary integration
+- **Profile Picture Upload** with Cloudinary optimization
 - **Profile Update** capabilities
 
-### 📸 Posts & Content Sharing
-- **Image Upload** with Cloudinary storage
-- **Create, Edit & Delete Posts**
-- **Rich Post Details** with captions and tags
-- **All Posts Feed** for discovering campus events
+### 📸 Content Management
+- **Multi-Image Upload** with Cloudinary storage
+- **Create, Edit & Delete Posts** with captions and tags
+- **Infinite Scroll Feed** for content discovery
 - **Individual Post Pages** with detailed views
 
 ### 💬 Social Interactions
-- **Like System** for posts
-- **Comment System** with nested comments
+- **Like System** with instant feedback
+- **Comment System** for post discussions
 - **Real-time Reactions** to posts
-- **Follow Notifications** for user connections
 
 ### 📁 Collections Feature
 - **Create Collections** to organize posts by themes
-- **Add Posts to Collections** for better organization
-- **Remove Posts from Collections**
-- **Delete Collections** when no longer needed
-- **View All Collections** per user
+- **Add/Remove Posts** from collections
+- **Delete Collections** with cleanup
+- **View All Collections** in grid layout
 
-### 🔍 Discovery & Search
-- **Explore Page** for discovering new content
+### 🔍 Discovery Features
+- **Explore Page** for content discovery
 - **Tag-based Browsing** for specific topics
-- **User Profile Discovery** through follows
+- **User Profile Discovery** through following
 
-### 📱 Responsive Design
-- **Mobile-First Design** with Tailwind CSS
-- **Responsive Layout** for all screen sizes
-- **Modern UI/UX** with smooth animations
+### 📱 UI/UX Design
+- **Mobile-First Design** built with Tailwind CSS
+- **Responsive Layout** adapting to all screen sizes
+- **Smooth Animations** using Framer Motion
+
+### ⚡ Performance Features
+- **Infinite Scrolling** with intersection observer
+- **Redux State Management** for efficient data flow
 
 ## 🛠️ Tech Stack
 
@@ -71,34 +72,81 @@ SnapIt is a full-stack social media platform designed specifically for college s
 - **Bcrypt** for password hashing
 
 ### DevOps & Deployment
-- **Docker** containerization
 - **Netlify** for frontend deployment
 - **MongoDB Atlas** for database
 - **Cloudinary** for media storage
 
-## 📁 Project Structure
+## 🏗️ Architecture & Design
+
+### System Architecture
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Frontend│    │   Express Backend│    │   MongoDB Atlas │
+│   (Vite + Redux)│◄──►│   (Node.js API)  │◄──►│   (Database)    │
+│                 │    │                 │    │                 │
+│ - Components    │    │ - Controllers   │    │ - Users         │
+│ - Pages         │    │ - Routes        │    │ - Posts         │
+│ - State Mgmt    │    │ - Middleware    │    │ - Collections   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌─────────────────┐
+                    │   Cloudinary    │
+                    │ (Image Storage) │
+                    └─────────────────┘
+```
+
+### Database Schema
+- **Users**: Profile info, authentication, followers/following
+- **Posts**: Content, images, metadata, reactions, comments
+- **Collections**: User-created groups for organizing posts
+- **Comments**: Threaded conversation system
+
+## 📁 Detailed Project Structure
 
 ```
 SnapIt/
-├── frontend/                 # React frontend
+├── frontend/                          # React 18 + Vite frontend
 │   ├── src/
-│   │   ├── components/      # Reusable components
-│   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   ├── slices/         # Redux slices
-│   │   └── assets/         # Static assets
-│   ├── public/             # Public files
-│   └── Dockerfile          # Frontend container
-├── backend/                 # Node.js backend
-│   ├── controllers/        # Route controllers
-│   ├── middlewares/        # Custom middlewares
-│   ├── model/             # Mongoose models
-│   ├── routes/            # API routes
-│   ├── config/            # Configuration files
-│   ├── utils/             # Utility functions
-│   └── Dockerfile         # Backend container
-├── docker-compose.yml      # Docker orchestration
-└── README.md              # Project documentation
+│   │   ├── components/               # Reusable UI components
+│   │   │   ├── common/              # Shared components (Navbar, Footer)
+│   │   │   ├── core/                # Core features (Auth, Posts, Dashboard)
+│   │   │   │   ├── Auth/            # Login, Signup, PrivateRoute
+│   │   │   │   ├── Posts/           # PostCard, CreatePost, LoggedHomePage
+│   │   │   │   └── Dashboard/       # User dashboard components
+│   │   │   └── collections/         # Collection management
+│   │   ├── pages/                   # Route-based page components
+│   │   ├── services/                # API integration layer
+│   │   │   ├── operations/          # Redux async thunks
+│   │   │   └── apis.js             # Axios configuration
+│   │   ├── slices/                  # Redux state slices
+│   │   ├── reducer/                 # Redux store configuration
+│   │   ├── AnimationsFile/          # Framer Motion animations
+│   │   └── assets/                  # Static assets & images
+│   ├── public/                      # Public static files
+│   └── package.json                 # Dependencies & scripts
+├── backend/                          # Node.js + Express backend
+│   ├── controllers/                 # Business logic controllers
+│   │   ├── userController.js       # User management
+│   │   ├── postController.js       # Post operations
+│   │   └── collectionController.js # Collection handling
+│   ├── middlewares/                # Custom middleware
+│   │   ├── isAuth.js              # JWT authentication
+│   │   └── multer.js              # File upload handling
+│   ├── model/                      # Mongoose data models
+│   │   ├── userModel.js           # User schema
+│   │   ├── postModel.js           # Post schema
+│   │   └── collectionModel.js     # Collection schema
+│   ├── routes/                     # API route definitions
+│   ├── config/                     # Configuration files
+│   │   ├── database.js            # MongoDB connection
+│   │   └── cloudinary.js          # Cloudinary setup
+│   ├── utils/                      # Utility functions
+│   │   ├── generateToken.js       # JWT token generation
+│   │   └── imageUploader.js       # Image processing
+│   └── package.json                # Dependencies & scripts
+└── README.md                        # Project documentation
 ```
 
 ## 🚀 Getting Started
@@ -160,17 +208,6 @@ cd frontend
 npm run dev
 ```
 
-### Docker Setup
-
-1. **Build and run with Docker Compose**
-```bash
-docker-compose up --build
-```
-
-2. **Access the application**
-- Frontend: http://localhost:3000
-- Backend: http://localhost:4000
-
 ## 📸 API Endpoints
 
 ### Authentication
@@ -200,18 +237,6 @@ docker-compose up --build
 - `POST /api/v1/collections/:collectionId/posts` - Add post to collection
 - `DELETE /api/v1/collections/:collectionId` - Delete collection
 
-## 🧪 Testing
-
-### Manual Testing Checklist
-- [ ] User registration and login
-- [ ] Profile creation and updates
-- [ ] Image upload functionality
-- [ ] Post creation, editing, and deletion
-- [ ] Comment system
-- [ ] Like/reaction system
-- [ ] Follow/unfollow functionality
-- [ ] Collection creation and management
-- [ ] Responsive design on mobile devices
 
 ## 🚀 Deployment
 

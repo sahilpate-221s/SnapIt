@@ -81,14 +81,6 @@ export function logout(navigate) {
       if (!data?.success) throw new Error(data?.message);
 
       toast.success("Logout Successful");
-
-      dispatch(clearToken());
-      dispatch(setUser(null));
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      navigate("/");
     } catch (error) {
       toast.error(
         error?.response?.data?.message || error.message || "Logout Failed"
@@ -96,6 +88,14 @@ export function logout(navigate) {
     } finally {
       dispatch(setLoading(false));
     }
+
+    dispatch(clearToken());
+    dispatch(setUser(null));
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/");
   };
 }
 
