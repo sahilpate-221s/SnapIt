@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
 	cors({
-		origin: 'http://localhost:5173',
-		// origin: 'https://snapitapp1.netlify.app',
+		// origin: 'http://localhost:5173',
+		origin: 'https://snapitapp1.netlify.app',
 		credentials: true,
 	})
 );
